@@ -3,12 +3,12 @@ import streamlit as st
 from modules.document_processor import process_document
 
 st.set_page_config(
-    page_title="GPDI Course Builder",
+    page_title="GPDI AI Lecturer Assistant",
     page_icon="📚",
     layout="wide"
 )
 
-st.title("📚 GPDI Course Builder")
+st.title("📚 GPDI AI Lecturer Assistant")
 
 st.subheader("Version 0.2")
 
