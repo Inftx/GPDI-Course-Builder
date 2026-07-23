@@ -1,7 +1,6 @@
 import streamlit as st
 
-from modules.pdf_reader import extract_pdf_text
-from modules.docx_reader import extract_docx_text
+from modules.document_processor import process_document
 
 st.set_page_config(
     page_title="GPDI Course Builder",
@@ -20,21 +19,20 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file:
 
-    if uploaded_file.name.endswith(".pdf"):
-        extracted_text = extract_pdf_text(uploaded_file)
+    try:
 
-    elif uploaded_file.name.endswith(".docx"):
-        extracted_text = extract_docx_text(uploaded_file)
+        extracted_text = process_document(uploaded_file)
 
-    else:
-        extracted_text = "Unsupported file."
+        st.success("Document successfully processed!")
 
-    st.success("Document successfully read!")
+        st.subheader("Extracted Text")
 
-    st.subheader("Extracted Text")
+        st.text_area(
+            "Document Contents",
+            extracted_text,
+            height=400
+        )
 
-    st.text_area(
-        "Document Contents",
-        extracted_text,
-        height=400
-    )
+    except Exception as error:
+
+        st.error(error)
