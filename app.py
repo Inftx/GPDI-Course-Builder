@@ -1,6 +1,8 @@
 import streamlit as st
 
-from modules.document_processor import process_document
+# --------------------------------------------------
+# PAGE CONFIGURATION
+# --------------------------------------------------
 
 st.set_page_config(
     page_title="GPDI AI Lecturer Assistant",
@@ -8,31 +10,63 @@ st.set_page_config(
     layout="wide"
 )
 
+# --------------------------------------------------
+# HEADER
+# --------------------------------------------------
+
 st.title("📚 GPDI AI Lecturer Assistant")
 
-st.subheader("Version 0.2")
+st.caption("Version 1.0")
 
-uploaded_file = st.file_uploader(
-    "Upload a Learner Guide or Facilitator Guide",
-    type=["pdf", "docx"]
+st.divider()
+
+# --------------------------------------------------
+# WELCOME
+# --------------------------------------------------
+
+st.header("Welcome")
+
+st.write("""
+Welcome to the GPDI AI Lecturer Assistant.
+
+This application is designed to help lecturers and instructional designers:
+
+• Manage educational projects
+
+• Upload learner and facilitator guides
+
+• Analyse qualification documents
+
+• Generate AI lesson plans
+
+• Create facilitator guides
+
+• Generate assessments
+
+• Export teaching material
+""")
+
+st.divider()
+
+# --------------------------------------------------
+# SYSTEM STATUS
+# --------------------------------------------------
+
+st.subheader("System Status")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.success("Project System")
+
+with col2:
+    st.success("Document Processing")
+
+with col3:
+    st.info("AI Generator (Coming Soon)")
+
+st.divider()
+
+st.info(
+    "Use the navigation menu on the left to access each section of the application."
 )
-
-if uploaded_file:
-
-    try:
-
-        extracted_text = process_document(uploaded_file)
-
-        st.success("Document successfully processed!")
-
-        st.subheader("Extracted Text")
-
-        st.text_area(
-            "Document Contents",
-            extracted_text,
-            height=400
-        )
-
-    except Exception as error:
-
-        st.error(error)
