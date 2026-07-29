@@ -4,52 +4,30 @@ from modules.session_manager import get_current_project
 
 from modules.file_manager import (
     save_uploaded_file,
-    save_extracted_text
+    save_extracted_text,
+    save_formatted_text
 )
 
 from modules.document_processor import process_document
-
 from modules.document_analyzer import analyze_document
-
 from modules.metadata_manager import save_document_metadata
 
 
+st.set_page_config(page_title="Upload Documents", page_icon="📄")
+
 st.title("📄 Upload Documents")
-
-st.write(
-    "Upload learner guides, facilitator guides, workbooks and other supporting documents."
-)
-
-st.divider()
-
-# ------------------------------------------
-# ACTIVE PROJECT
-# ------------------------------------------
 
 project = get_current_project()
 
 if not project:
-
-    st.warning(
-        "Please select a project first using the Project Manager page."
-    )
-
+    st.warning("Please select a project in the Project Manager first.")
     st.stop()
 
 st.success(f"Current Project: {project}")
 
-st.divider()
-
-# ------------------------------------------
-# FILE UPLOADER
-# ------------------------------------------
-
 uploaded_file = st.file_uploader(
-
-    "Choose a document",
-
+    "Upload a document",
     type=["pdf", "docx", "txt", "png", "jpg", "jpeg"]
-
 )
 
 if uploaded_file:
@@ -57,78 +35,100 @@ if uploaded_file:
     with st.spinner("Processing document..."):
 
         # Save original file
-
         save_uploaded_file(
             uploaded_file,
             project
         )
 
-        # Extract text
+        # Process document
+        result = process_document(uploaded_file)
 
-        extracted_text = process_document(
-            uploaded_file
-        )
+        raw_text = result["raw"]
+        cleaned_text = result["clean"]
+        structured_text = result["structured"]
 
-        # Save extracted text
-
+        # Save cleaned text
         save_extracted_text(
-
-            extracted_text,
-
+            cleaned_text,
             uploaded_file.name,
-
             project
-
         )
 
-        # Analyse document
-
-        analysis = analyze_document(
-            extracted_text
+        # Save structured text
+        save_formatted_text(
+            structured_text,
+            uploaded_file.name,
+            project
         )
+
+        # Analyse structured text
+        analysis = analyze_document(structured_text)
 
         # Save metadata
-
         save_document_metadata(
-
             project,
-
             uploaded_file.name,
-
             analysis
-
         )
 
-    st.success("Document processed successfully!")
+    st.success("✅ Document processed successfully.")
 
     st.divider()
 
-    st.subheader("Document Statistics")
+    col1, col2, col3, col4 = st.columns(4)
 
-    col1, col2 = st.columns(2)
+    col1.metric(
+        "Words",
+        analysis["word_count"]
+    )
 
-    with col1:
+    col2.metric(
+        "Characters",
+        analysis["character_count"]
+    )
 
-        st.metric(
-            "Words",
-            analysis["word_count"]
+    col3.metric(
+        "Pages",
+        analysis["estimated_pages"]
+    )
+
+    col4.metric(
+        "Reading Time",
+        f"{analysis['reading_time']} min"
+    )
+
+    st.divider()
+
+    tab1, tab2, tab3 = st.tabs(
+        [
+            "📄 Raw Text",
+            "🧹 Cleaned Text",
+            "🧠 Structured Document"
+        ]
+    )
+
+    with tab1:
+
+        st.text_area(
+            "Raw Extracted Text",
+            raw_text,
+            height=500
         )
 
-        st.metric(
-            "Pages (Estimated)",
-            analysis["estimated_pages"]
+    with tab2:
+
+        st.text_area(
+            "Cleaned Text",
+            cleaned_text,
+            height=500
         )
 
-    with col2:
+    with tab3:
 
-        st.metric(
-            "Characters",
-            analysis["character_count"]
-        )
-
-        st.metric(
-            "Reading Time",
-            f'{analysis["reading_time"]} min'
+        st.text_area(
+            "Structured Document",
+            structured_text,
+            height=500
         )
 
     st.divider()
@@ -139,7 +139,7 @@ if uploaded_file:
 
         for heading in analysis["headings"]:
 
-            st.write("•", heading)
+            st.write(f"• {heading}")
 
     else:
 
@@ -152,13 +152,3 @@ if uploaded_file:
     for word, count in analysis["keywords"]:
 
         st.write(f"**{word}** ({count})")
-
-    st.divider()
-
-    st.subheader("Extracted Text")
-
-    st.text_area(
-    "Extracted Document Text",
-    extracted_text,
-    height=350
-)

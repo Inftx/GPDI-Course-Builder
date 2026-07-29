@@ -84,3 +84,40 @@ def analyze_document(text):
         "keywords": keywords
 
     }
+
+def save_formatted_text(
+    text,
+    original_filename,
+    project_name
+):
+    """
+    Saves the formatted version of an extracted document.
+    """
+
+    from pathlib import Path
+
+    project_folder = Path("projects") / project_name
+
+    formatted_folder = project_folder / "formatted"
+
+    formatted_folder.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    filename = (
+        Path(original_filename).stem
+        + "_formatted.txt"
+    )
+
+    file_path = formatted_folder / filename
+
+    with open(
+        file_path,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        file.write(text)
+
+    return file_path
