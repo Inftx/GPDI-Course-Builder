@@ -1,9 +1,12 @@
 {
     "project": "Who is Siba",
     "documents": [
-        "Applicable Legislation.docx"
+        "Applicable Legislation.docx",
+        "KM-03-Learner Guide.docx"
     ],
-    "modules": [],
+    "modules": [
+        "KNOWLEDGE MODULE"
+    ],
     "learning_outcomes": [],
     "assessment_criteria": [],
     "knowledge_requirements": [],
