@@ -11,60 +11,117 @@ from modules.file_manager import (
 from modules.document_processor import process_document
 from modules.document_analyzer import analyze_document
 from modules.metadata_manager import save_document_metadata
+from modules.knowledge_builder import build_knowledge
 
 
-st.set_page_config(page_title="Upload Documents", page_icon="📄")
+# --------------------------------------------------
+# PAGE CONFIGURATION
+# --------------------------------------------------
+
+st.set_page_config(
+    page_title="Upload Documents",
+    page_icon="📄"
+)
 
 st.title("📄 Upload Documents")
+
+# --------------------------------------------------
+# CURRENT PROJECT
+# --------------------------------------------------
 
 project = get_current_project()
 
 if not project:
-    st.warning("Please select a project in the Project Manager first.")
+    st.warning("Please select a project from the Project Manager first.")
     st.stop()
 
 st.success(f"Current Project: {project}")
 
+st.divider()
+
+# --------------------------------------------------
+# FILE UPLOAD
+# --------------------------------------------------
+
 uploaded_file = st.file_uploader(
-    "Upload a document",
-    type=["pdf", "docx", "txt", "png", "jpg", "jpeg"]
+    "Upload a Learner Guide, Facilitator Guide or Supporting Document",
+    type=[
+        "pdf",
+        "docx",
+        "txt",
+        "png",
+        "jpg",
+        "jpeg"
+    ]
 )
 
 if uploaded_file:
 
     with st.spinner("Processing document..."):
 
-        # Save original file
+        # ------------------------------
+        # Save Original Document
+        # ------------------------------
+
         save_uploaded_file(
             uploaded_file,
             project
         )
 
-        # Process document
-        result = process_document(uploaded_file)
+        # ------------------------------
+        # Process Document
+        # ------------------------------
+
+        result = process_document(
+            uploaded_file
+        )
 
         raw_text = result["raw"]
         cleaned_text = result["clean"]
         structured_text = result["structured"]
 
-        # Save cleaned text
+        # ------------------------------
+        # Save Cleaned Text
+        # ------------------------------
+
         save_extracted_text(
             cleaned_text,
             uploaded_file.name,
             project
         )
 
-        # Save structured text
+        # ------------------------------
+        # Save Structured Text
+        # ------------------------------
+
         save_formatted_text(
             structured_text,
             uploaded_file.name,
             project
         )
 
-        # Analyse structured text
-        analysis = analyze_document(structured_text)
+        # ------------------------------
+        # Analyse Document
+        # ------------------------------
 
-        # Save metadata
+        analysis = analyze_document(
+            structured_text
+        )
+
+        # ------------------------------
+        # Build Knowledge Base
+        # ------------------------------
+
+        knowledge = build_knowledge(
+            structured_text,
+            uploaded_file.name,
+            project
+        )
+
+        # ------------------------------
+        # Save Metadata
+        # ------------------------------
+
         save_document_metadata(
             project,
             uploaded_file.name,
@@ -75,65 +132,81 @@ if uploaded_file:
 
     st.divider()
 
+    # --------------------------------------------------
+    # DOCUMENT STATISTICS
+    # --------------------------------------------------
+
+    st.subheader("📊 Document Statistics")
+
     col1, col2, col3, col4 = st.columns(4)
 
-    col1.metric(
-        "Words",
-        analysis["word_count"]
-    )
-
-    col2.metric(
-        "Characters",
-        analysis["character_count"]
-    )
-
-    col3.metric(
-        "Pages",
-        analysis["estimated_pages"]
-    )
-
-    col4.metric(
-        "Reading Time",
-        f"{analysis['reading_time']} min"
-    )
-
-    st.divider()
-
-    tab1, tab2, tab3 = st.tabs(
-        [
-            "📄 Raw Text",
-            "🧹 Cleaned Text",
-            "🧠 Structured Document"
-        ]
-    )
-
-    with tab1:
-
-        st.text_area(
-            "Raw Extracted Text",
-            raw_text,
-            height=500
+    with col1:
+        st.metric(
+            "Words",
+            analysis["word_count"]
         )
 
-    with tab2:
-
-        st.text_area(
-            "Cleaned Text",
-            cleaned_text,
-            height=500
+    with col2:
+        st.metric(
+            "Characters",
+            analysis["character_count"]
         )
 
-    with tab3:
+    with col3:
+        st.metric(
+            "Estimated Pages",
+            analysis["estimated_pages"]
+        )
 
-        st.text_area(
-            "Structured Document",
-            structured_text,
-            height=500
+    with col4:
+        st.metric(
+            "Reading Time",
+            f"{analysis['reading_time']} min"
         )
 
     st.divider()
 
-    st.subheader("Detected Headings")
+    # --------------------------------------------------
+    # DOCUMENT TABS
+    # --------------------------------------------------
+
+    raw_tab, clean_tab, structured_tab = st.tabs([
+        "📄 Raw Text",
+        "🧹 Cleaned Text",
+        "🧠 Structured Document"
+    ])
+
+    with raw_tab:
+
+        st.text_area(
+            label="Raw Extracted Text",
+            value=raw_text,
+            height=500
+        )
+
+    with clean_tab:
+
+        st.text_area(
+            label="Cleaned Text",
+            value=cleaned_text,
+            height=500
+        )
+
+    with structured_tab:
+
+        st.text_area(
+            label="Structured Document",
+            value=structured_text,
+            height=500
+        )
+
+    st.divider()
+
+    # --------------------------------------------------
+    # DETECTED HEADINGS
+    # --------------------------------------------------
+
+    st.subheader("📑 Detected Headings")
 
     if analysis["headings"]:
 
@@ -147,8 +220,50 @@ if uploaded_file:
 
     st.divider()
 
-    st.subheader("Top Keywords")
+    # --------------------------------------------------
+    # TOP KEYWORDS
+    # --------------------------------------------------
 
-    for word, count in analysis["keywords"]:
+    st.subheader("🔑 Top Keywords")
 
-        st.write(f"**{word}** ({count})")
+    if analysis["keywords"]:
+
+        for word, count in analysis["keywords"]:
+
+            st.write(f"**{word}** ({count})")
+
+    else:
+
+        st.info("No keywords detected.")
+
+    st.divider()
+
+    # --------------------------------------------------
+    # KNOWLEDGE BASE
+    # --------------------------------------------------
+
+    st.subheader("🧠 Knowledge Base Summary")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            "Modules",
+            len(knowledge["modules"])
+        )
+
+    with col2:
+        st.metric(
+            "Learning Outcomes",
+            len(knowledge["learning_outcomes"])
+        )
+
+    with col3:
+        st.metric(
+            "Assessment Criteria",
+            len(knowledge["assessment_criteria"])
+        )
+
+    with st.expander("View Knowledge Base"):
+
+        st.json(knowledge)
