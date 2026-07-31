@@ -5,7 +5,10 @@ import streamlit as st
 
 from modules.session_manager import get_current_project
 from modules.ai_engine import AILecturer
-from modules.ollama_provider import OllamaProvider
+from services.ai.provider_manager import ProviderManager
+from services.rag.chunker import chunk_document
+from services.rag.indexer import build_index
+from services.rag.retriever import retrieve_context
 
 
 st.set_page_config(
@@ -49,7 +52,7 @@ with open(
 
 engine = AILecturer(course)
 
-provider = OllamaProvider()
+provider = ProviderManager.get_provider("ollama")
 
 task = st.selectbox(
 
@@ -93,15 +96,25 @@ if st.button(
 
 ):
 
-    with st.spinner(
+    course_text = "\n\n".join(
+        [
+            "Course Documents\n" + "\n".join(course["documents"]),
+            "\n".join(course["modules"]),
+            "Learning Outcomes\n" + "\n".join(course["learning_outcomes"]),
+            "Assessment Criteria\n" + "\n".join(course["assessment_criteria"]),
+            "Knowledge Requirements\n" + "\n".join(
+                course["knowledge_requirements"]
+            ),
+            "Practical Activities\n" + "\n".join(
+                course["practical_activities"]
+            ),
+            "Workplace Activities\n" + "\n".join(
+                course["workplace_activities"]
+            ),
+        ]
+    )
 
-        "Ollama is generating your content..."
-
-    ):
-
-        prompt = engine.generate_prompt(
-
-            f"""
+    user_request = f"""
 
 Create a professional {task}.
 
@@ -112,6 +125,33 @@ Additional Instructions:
 {instructions}
 
 Return the content in a professional educational format.
+
+"""
+
+    chunks = chunk_document(course_text)
+    index = build_index(chunks)
+    retrieved_context = retrieve_context(
+        index,
+        f"{task} {instructions}",
+    )
+
+    with st.spinner(
+
+        "Ollama is generating your content..."
+
+    ):
+
+        prompt = engine.generate_prompt(
+
+            f"""
+
+Course Context
+
+{retrieved_context}
+
+User Request
+
+{user_request}
 
 """
 

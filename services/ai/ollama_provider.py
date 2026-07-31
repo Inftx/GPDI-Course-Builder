@@ -1,6 +1,6 @@
 import ollama
 
-from modules.ai_provider import AIProvider
+from services.ai.ai_provider import AIProvider
 
 
 class OllamaProvider(AIProvider):

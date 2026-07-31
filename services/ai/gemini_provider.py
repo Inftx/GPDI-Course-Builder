@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from google import genai
 
-from modules.ai_provider import AIProvider
+from services.ai.ai_provider import AIProvider
 
 load_dotenv()
 
