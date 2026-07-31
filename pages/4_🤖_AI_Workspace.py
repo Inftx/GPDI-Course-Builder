@@ -9,6 +9,7 @@ from services.ai.provider_manager import ProviderManager
 from services.rag.chunker import chunk_document
 from services.rag.indexer import build_index
 from services.rag.retriever import retrieve_context
+from services.output.output_manager import save_output
 
 
 st.set_page_config(
@@ -77,6 +78,16 @@ task = st.selectbox(
     ]
 
 )
+
+output_types = {
+    "Lesson Plan": "lesson_plans",
+    "Facilitator Guide": "facilitator_guides",
+    "Assessment": "assessments",
+    "Quiz": "quizzes",
+    "Teaching Script": "teaching_scripts",
+    "Student Notes": "student_notes",
+    "PowerPoint": "powerpoints",
+}
 
 instructions = st.text_area(
 
@@ -163,8 +174,26 @@ User Request
                 prompt
             )
 
+            saved_path = save_output(
+                project,
+                output_types[task],
+                result,
+            )
+
             st.success(
                 "Generation completed."
+            )
+
+            st.success(
+                "✅ Output saved successfully."
+            )
+
+            st.write(
+                "Saved Location:"
+            )
+
+            st.code(
+                str(saved_path)
             )
 
             st.divider()
