@@ -10,6 +10,10 @@ from services.rag.chunker import chunk_document
 from services.rag.indexer import build_index
 from services.rag.retriever import retrieve_context
 from services.output.output_manager import save_output
+from services.generators.lesson_plan_generator import generate_lesson_plan
+from services.generators.facilitator_guide_generator import (
+    generate_facilitator_guide,
+)
 
 
 st.set_page_config(
@@ -99,13 +103,97 @@ instructions = st.text_area(
 
 )
 
+if task in {"Lesson Plan", "Facilitator Guide"}:
+
+    module_name = st.text_input(
+        "Module Name"
+    )
+
+    duration_hours = st.number_input(
+        "Duration (hours)",
+        min_value=0.5,
+        step=0.5,
+    )
+
+    generate_label = f"Generate {task}"
+
+else:
+
+    generate_label = "🚀 Generate"
+
 if st.button(
 
-    "🚀 Generate",
+    generate_label,
 
     use_container_width=True
 
 ):
+
+    if task == "Lesson Plan":
+
+        with st.spinner(
+            "Ollama is generating your lesson plan..."
+        ):
+
+            try:
+
+                result = generate_lesson_plan(
+                    project,
+                    module_name,
+                    duration_hours,
+                    provider,
+                )
+
+                st.success(
+                    "Lesson plan generated and saved successfully."
+                )
+
+                st.divider()
+
+                st.subheader(
+                    "Lesson Plan"
+                )
+
+                st.markdown(result)
+
+            except Exception as error:
+
+                st.error(error)
+
+        st.stop()
+
+    if task == "Facilitator Guide":
+
+        with st.spinner(
+            "Ollama is generating your facilitator guide..."
+        ):
+
+            try:
+
+                result = generate_facilitator_guide(
+                    project,
+                    module_name,
+                    duration_hours,
+                    provider,
+                )
+
+                st.success(
+                    "Facilitator guide generated and saved successfully."
+                )
+
+                st.divider()
+
+                st.subheader(
+                    "Facilitator Guide"
+                )
+
+                st.markdown(result)
+
+            except Exception as error:
+
+                st.error(error)
+
+        st.stop()
 
     course_text = "\n\n".join(
         [
