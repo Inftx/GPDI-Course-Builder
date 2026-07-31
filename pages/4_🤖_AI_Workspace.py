@@ -16,6 +16,7 @@ from services.generators.facilitator_guide_generator import (
 )
 from services.generators.assessment_generator import generate_assessment
 from services.generators.teaching_script_generator import generate_teaching_script
+from services.generators.training_pack_generator import generate_training_pack
 
 
 st.set_page_config(
@@ -79,7 +80,9 @@ task = st.selectbox(
 
         "Student Notes",
 
-        "Quiz"
+        "Quiz",
+
+        "Complete Training Pack"
 
     ]
 
@@ -166,6 +169,20 @@ elif task == "Teaching Script":
     )
 
     generate_label = "Generate Teaching Script"
+
+elif task == "Complete Training Pack":
+
+    module_name = st.text_input(
+        "Module Name"
+    )
+
+    duration_hours = st.number_input(
+        "Session Duration (hours)",
+        min_value=0.5,
+        step=0.5,
+    )
+
+    generate_label = "🚀 Generate Complete Training Pack"
 
 else:
 
@@ -305,6 +322,73 @@ if st.button(
                 )
 
                 st.markdown(result)
+
+            except Exception as error:
+
+                st.error(error)
+
+        st.stop()
+
+    if task == "Complete Training Pack":
+
+        progress_bar = st.progress(
+            0,
+            text="Generating Lesson Plan...",
+        )
+
+        with st.spinner(
+            "Ollama is generating your complete training pack..."
+        ):
+
+            try:
+
+                training_pack = generate_training_pack(
+                    project,
+                    module_name,
+                    duration_hours,
+                    provider,
+                )
+
+                progress_stages = [
+                    ("Lesson Plan", "lesson_plan"),
+                    ("Facilitator Guide", "facilitator_guide"),
+                    ("Teaching Script", "teaching_script"),
+                    ("Assessment", "assessment"),
+                ]
+
+                for progress, (label, _) in enumerate(
+                    progress_stages,
+                    start=1,
+                ):
+                    progress_bar.progress(
+                        progress * 25,
+                        text=f"{label} generated.",
+                    )
+
+                st.success(
+                    "✅ Training Pack Generated Successfully"
+                )
+
+                lesson_tab, guide_tab, script_tab, assessment_tab = st.tabs(
+                    [
+                        "📘 Lesson Plan",
+                        "👨‍🏫 Facilitator Guide",
+                        "🎤 Teaching Script",
+                        "📝 Assessment",
+                    ]
+                )
+
+                with lesson_tab:
+                    st.markdown(training_pack["lesson_plan"])
+
+                with guide_tab:
+                    st.markdown(training_pack["facilitator_guide"])
+
+                with script_tab:
+                    st.markdown(training_pack["teaching_script"])
+
+                with assessment_tab:
+                    st.markdown(training_pack["assessment"])
 
             except Exception as error:
 
