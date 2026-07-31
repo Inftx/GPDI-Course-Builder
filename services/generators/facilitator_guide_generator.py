@@ -5,41 +5,44 @@ from services.generators.base_generator import generate_document
 
 
 FACILITATOR_GUIDE_PROMPT_TEMPLATE = """
-Generate a professional facilitator guide in Markdown using the course context
-below. Use the following structure exactly, completing every section with
-relevant, practical educational content.
+Generate a complete professional facilitator guide in Markdown using only the
+retrieved course context below. Do not add facts, requirements, or examples
+that are absent from the course context. Use the session duration only to plan
+the guide's pacing.
 
 # Facilitator Guide
 
-## Qualification Information
-
 ## Module Information
-
-## Purpose of the Module
 
 ## Learning Outcomes
 
-## Session Preparation
+## Session Objectives
 
 ## Required Resources
 
-## Facilitation Notes
+## Preparation Checklist
 
-## Teaching Strategy
+## Lesson Delivery
 
-## Suggested Activities
+### Introduction
 
-## Discussion Questions
+### Main Lesson
 
-## Practical Activities
+### Practical Activities
 
-## Assessment Guidance
+### Group Activities
 
-## Common Learner Challenges
+### Discussion Questions
 
-## Tips for Facilitators
+### Assessment Preparation
 
-## Closing Summary
+### Common Learner Questions
+
+### Facilitator Tips
+
+### Summary
+
+### Homework
 
 Course Context
 
@@ -47,9 +50,7 @@ Course Context
 
 Guide Details
 
-Qualification: {qualification}
-Module: {module_name}
-Duration: {duration_hours} hours
+Session Duration: {duration_hours} hours
 """
 
 
@@ -59,11 +60,11 @@ def generate_facilitator_guide(
     duration_hours: float,
     ai_provider: AIProvider,
 ) -> str:
-    """Generate and save a professional Markdown facilitator guide.
+    """Generate and save a context-grounded Markdown facilitator guide.
 
     Args:
         project_name: Name of the project containing processed knowledge.
-        module_name: Module for which to generate the guide.
+        module_name: Module used to retrieve the guide context.
         duration_hours: Planned facilitation duration in hours.
         ai_provider: Configured provider used to generate AI content.
 

@@ -14,6 +14,8 @@ from services.generators.lesson_plan_generator import generate_lesson_plan
 from services.generators.facilitator_guide_generator import (
     generate_facilitator_guide,
 )
+from services.generators.assessment_generator import generate_assessment
+from services.generators.teaching_script_generator import generate_teaching_script
 
 
 st.set_page_config(
@@ -103,7 +105,7 @@ instructions = st.text_area(
 
 )
 
-if task in {"Lesson Plan", "Facilitator Guide"}:
+if task == "Lesson Plan":
 
     module_name = st.text_input(
         "Module Name"
@@ -115,7 +117,55 @@ if task in {"Lesson Plan", "Facilitator Guide"}:
         step=0.5,
     )
 
-    generate_label = f"Generate {task}"
+    generate_label = "Generate Lesson Plan"
+
+elif task == "Facilitator Guide":
+
+    module_name = st.text_input(
+        "Module Name"
+    )
+
+    duration_hours = st.number_input(
+        "Session Duration (hours)",
+        min_value=0.5,
+        step=0.5,
+    )
+
+    generate_label = "Generate Facilitator Guide"
+
+elif task == "Assessment":
+
+    module_name = st.text_input(
+        "Module Name"
+    )
+
+    number_of_questions = st.number_input(
+        "Number of Questions",
+        min_value=1,
+        value=10,
+        step=1,
+    )
+
+    difficulty = st.selectbox(
+        "Difficulty",
+        ["Easy", "Moderate", "Advanced"],
+    )
+
+    generate_label = "Generate Assessment"
+
+elif task == "Teaching Script":
+
+    module_name = st.text_input(
+        "Module Name"
+    )
+
+    duration_hours = st.number_input(
+        "Session Duration",
+        min_value=0.5,
+        step=0.5,
+    )
+
+    generate_label = "Generate Teaching Script"
 
 else:
 
@@ -185,6 +235,73 @@ if st.button(
 
                 st.subheader(
                     "Facilitator Guide"
+                )
+
+                st.markdown(result)
+
+            except Exception as error:
+
+                st.error(error)
+
+        st.stop()
+
+    if task == "Assessment":
+
+        with st.spinner(
+            "Ollama is generating your assessment..."
+        ):
+
+            try:
+
+                result = generate_assessment(
+                    project,
+                    module_name,
+                    number_of_questions,
+                    difficulty,
+                    provider,
+                )
+
+                st.success(
+                    "Assessment generated and saved successfully."
+                )
+
+                st.divider()
+
+                st.subheader(
+                    "Assessment"
+                )
+
+                st.markdown(result)
+
+            except Exception as error:
+
+                st.error(error)
+
+        st.stop()
+
+    if task == "Teaching Script":
+
+        with st.spinner(
+            "Ollama is generating your teaching script..."
+        ):
+
+            try:
+
+                result = generate_teaching_script(
+                    project,
+                    module_name,
+                    duration_hours,
+                    provider,
+                )
+
+                st.success(
+                    "Teaching script generated and saved successfully."
+                )
+
+                st.divider()
+
+                st.subheader(
+                    "Teaching Script"
                 )
 
                 st.markdown(result)
