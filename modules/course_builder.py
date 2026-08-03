@@ -1,6 +1,10 @@
 import json
 from pathlib import Path
 
+from services.rag.chunker import chunk_document
+from services.rag.indexer import build_index
+from services.rag.storage import save_index
+
 
 def build_course(project_name):
     """
@@ -78,5 +82,21 @@ def build_course(project_name):
             indent=4,
             ensure_ascii=False
         )
+
+    knowledge_chunks = chunk_document(
+        "\n\n".join(
+            [
+                "Course Documents\n" + "\n".join(course["documents"]),
+                "\n".join(course["modules"]),
+                "Learning Outcomes\n" + "\n".join(course["learning_outcomes"]),
+                "Assessment Criteria\n" + "\n".join(course["assessment_criteria"]),
+                "Knowledge Requirements\n" + "\n".join(course["knowledge_requirements"]),
+                "Practical Activities\n" + "\n".join(course["practical_activities"]),
+                "Workplace Activities\n" + "\n".join(course["workplace_activities"]),
+            ]
+        )
+    )
+    rag_index = build_index(knowledge_chunks)
+    save_index(rag_index, project_name)
 
     return course

@@ -2,56 +2,7 @@
 
 from services.ai.ai_provider import AIProvider
 from services.generators.base_generator import generate_document
-
-
-FACILITATOR_GUIDE_PROMPT_TEMPLATE = """
-Generate a complete professional facilitator guide in Markdown using only the
-retrieved course context below. Do not add facts, requirements, or examples
-that are absent from the course context. Use the session duration only to plan
-the guide's pacing.
-
-# Facilitator Guide
-
-## Module Information
-
-## Learning Outcomes
-
-## Session Objectives
-
-## Required Resources
-
-## Preparation Checklist
-
-## Lesson Delivery
-
-### Introduction
-
-### Main Lesson
-
-### Practical Activities
-
-### Group Activities
-
-### Discussion Questions
-
-### Assessment Preparation
-
-### Common Learner Questions
-
-### Facilitator Tips
-
-### Summary
-
-### Homework
-
-Course Context
-
-{context}
-
-Guide Details
-
-Session Duration: {duration_hours} hours
-"""
+from services.prompts.facilitator_prompt import build_facilitator_prompt
 
 
 def generate_facilitator_guide(
@@ -59,6 +10,9 @@ def generate_facilitator_guide(
     module_name: str,
     duration_hours: float,
     ai_provider: AIProvider,
+    audience: str | None = None,
+    teaching_style: str | None = None,
+    detail_level: str | None = None,
 ) -> str:
     """Generate and save a context-grounded Markdown facilitator guide.
 
@@ -72,11 +26,22 @@ def generate_facilitator_guide(
         The generated facilitator-guide Markdown.
     """
 
+    prompt_template = build_facilitator_prompt(
+        "{context}",
+        "{qualification}",
+        "{module_name}",
+        "{duration_hours}",
+        "{generation_profile}",
+    )
+
     return generate_document(
         project_name,
         module_name,
         duration_hours,
         "facilitator_guides",
-        FACILITATOR_GUIDE_PROMPT_TEMPLATE,
+        prompt_template,
         ai_provider,
+        audience=audience,
+        teaching_style=teaching_style,
+        detail_level=detail_level,
     )

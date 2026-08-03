@@ -14,6 +14,9 @@ def generate_training_pack(
     module_name: str,
     duration: float,
     provider: AIProvider,
+    audience: str | None = None,
+    teaching_style: str | None = None,
+    detail_level: str | None = None,
 ) -> dict[str, str]:
     """Generate all training-pack documents sequentially.
 
@@ -32,18 +35,27 @@ def generate_training_pack(
         module_name,
         duration,
         provider,
+        audience=audience,
+        teaching_style=teaching_style,
+        detail_level=detail_level,
     )
     facilitator_guide = generate_facilitator_guide(
         project_name,
         module_name,
         duration,
         provider,
+        audience=audience,
+        teaching_style=teaching_style,
+        detail_level=detail_level,
     )
     teaching_script = generate_teaching_script(
         project_name,
         module_name,
         duration,
         provider,
+        audience=audience,
+        teaching_style=teaching_style,
+        detail_level=detail_level,
     )
     assessment = generate_assessment(
         project_name,
@@ -51,6 +63,9 @@ def generate_training_pack(
         10,
         "Moderate",
         provider,
+        audience=audience,
+        teaching_style=teaching_style,
+        detail_level=detail_level,
     )
 
     return {

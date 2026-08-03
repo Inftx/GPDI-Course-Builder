@@ -2,6 +2,7 @@
 
 from services.ai.ai_provider import AIProvider
 from services.generators.base_generator import generate_document
+from services.prompts.assessment_prompt import build_assessment_prompt
 
 
 def generate_assessment(
@@ -10,6 +11,9 @@ def generate_assessment(
     number_of_questions: int,
     difficulty: str,
     ai_provider: AIProvider,
+    audience: str | None = None,
+    teaching_style: str | None = None,
+    detail_level: str | None = None,
 ) -> str:
     """Generate and save a context-grounded Markdown assessment.
 
@@ -24,37 +28,15 @@ def generate_assessment(
         The generated assessment Markdown.
     """
 
-    prompt_template = f"""
-Generate a professional Markdown assessment using only the retrieved course
-context below. Do not add facts, requirements, or examples that are absent
-from the course context.
-
-# Assessment
-
-## Instructions
-
-## Section A
-{number_of_questions} Multiple Choice Questions
-
-## Section B
-{number_of_questions} Short Answer Questions
-
-## Section C
-5 Scenario-Based Questions
-
-## Marking Guide
-
-## Memorandum
-
-Assessment Settings
-
-Module: {module_name}
-Difficulty: {difficulty}
-
-Course Context
-
-{{context}}
-"""
+    prompt_template = build_assessment_prompt(
+        "{context}",
+        "{qualification}",
+        module_name,
+        "{duration_hours}",
+        "{generation_profile}",
+        number_of_questions,
+        difficulty,
+    )
 
     return generate_document(
         project_name,
@@ -63,4 +45,7 @@ Course Context
         "assessments",
         prompt_template,
         ai_provider,
+        audience=audience,
+        teaching_style=teaching_style,
+        detail_level=detail_level,
     )

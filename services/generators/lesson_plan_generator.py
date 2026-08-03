@@ -2,51 +2,7 @@
 
 from services.ai.ai_provider import AIProvider
 from services.generators.base_generator import generate_document
-
-
-LESSON_PLAN_PROMPT_TEMPLATE = """
-Generate a professional lesson plan in Markdown using the course context below.
-Use the following structure exactly, completing every section with relevant,
-practical educational content.
-
-# Lesson Plan
-
-## Qualification
-
-## Module
-
-## Duration
-
-## Learning Outcomes
-
-## Learning Objectives
-
-## Resources Required
-
-## Introduction
-
-## Lesson Activities
-
-## Facilitator Notes
-
-## Learner Activities
-
-## Formative Assessment
-
-## Reflection
-
-## Homework
-
-Course Context
-
-{context}
-
-Lesson Details
-
-Qualification: {qualification}
-Module: {module_name}
-Duration: {duration_hours} hours
-"""
+from services.prompts.lesson_plan_prompt import build_lesson_plan_prompt
 
 
 def generate_lesson_plan(
@@ -54,6 +10,9 @@ def generate_lesson_plan(
     module_name: str,
     duration_hours: float,
     ai_provider: AIProvider,
+    audience: str | None = None,
+    teaching_style: str | None = None,
+    detail_level: str | None = None,
 ) -> str:
     """Generate and save a professional Markdown lesson plan.
 
@@ -67,11 +26,22 @@ def generate_lesson_plan(
         The generated lesson-plan Markdown.
     """
 
+    prompt_template = build_lesson_plan_prompt(
+        "{context}",
+        "{qualification}",
+        "{module_name}",
+        "{duration_hours}",
+        "{generation_profile}",
+    )
+
     return generate_document(
         project_name,
         module_name,
         duration_hours,
         "lesson_plans",
-        LESSON_PLAN_PROMPT_TEMPLATE,
+        prompt_template,
         ai_provider,
+        audience=audience,
+        teaching_style=teaching_style,
+        detail_level=detail_level,
     )

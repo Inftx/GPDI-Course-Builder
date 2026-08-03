@@ -2,48 +2,7 @@
 
 from services.ai.ai_provider import AIProvider
 from services.generators.base_generator import generate_document
-
-
-TEACHING_SCRIPT_PROMPT_TEMPLATE = """
-Generate a conversational facilitator teaching script in Markdown using only
-the retrieved course context below. Do not add facts, requirements, or examples
-that are absent from the course context. Include practical timings appropriate
-to the stated session duration.
-
-# Teaching Script
-
-## Module Information
-
-## Facilitator Opening
-
-## Icebreaker
-
-## Introduction
-
-## Section-by-Section Script
-
-For every learning outcome, explain the content, give real-world examples, ask
-learner questions, suggest demonstrations, provide transition statements, and
-include expected learner responses.
-
-## Practical Activity Facilitation
-
-## Common Questions & Suggested Answers
-
-## Lesson Summary
-
-## Homework Instructions
-
-## Closing Remarks
-
-Course Context
-
-{context}
-
-Session Details
-
-Session Duration: {duration_hours} hours
-"""
+from services.prompts.teaching_script_prompt import build_teaching_script_prompt
 
 
 def generate_teaching_script(
@@ -51,6 +10,9 @@ def generate_teaching_script(
     module_name: str,
     duration_hours: float,
     ai_provider: AIProvider,
+    audience: str | None = None,
+    teaching_style: str | None = None,
+    detail_level: str | None = None,
 ) -> str:
     """Generate and save a context-grounded Markdown teaching script.
 
@@ -64,11 +26,22 @@ def generate_teaching_script(
         The generated teaching-script Markdown.
     """
 
+    prompt_template = build_teaching_script_prompt(
+        "{context}",
+        "{qualification}",
+        "{module_name}",
+        "{duration_hours}",
+        "{generation_profile}",
+    )
+
     return generate_document(
         project_name,
         module_name,
         duration_hours,
         "teaching_scripts",
-        TEACHING_SCRIPT_PROMPT_TEMPLATE,
+        prompt_template,
         ai_provider,
+        audience=audience,
+        teaching_style=teaching_style,
+        detail_level=detail_level,
     )
