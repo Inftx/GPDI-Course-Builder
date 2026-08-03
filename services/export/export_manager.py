@@ -4,20 +4,20 @@ from pathlib import Path
 
 from services.export.pdf_export import export_pdf
 from services.export.ppt_export import export_presentation
-from services.export.word_export import export_word
+from services.export.word_exporter import export_to_docx
 
 
 def export_document(
-    markdown: str,
-    output_format: str,
+    markdown_text: str,
+    output_type: str,
     output_path: str | Path,
     title: str | None = None,
 ) -> Path:
     """Export Markdown through the selected document exporter.
 
     Args:
-        markdown: Markdown content to export.
-        output_format: Supported format: ``docx``, ``pptx``, or ``pdf``.
+        markdown_text: Markdown content to export.
+        output_type: Supported format: ``docx``.
         output_path: Intended destination for the exported file.
         title: Optional document title.
 
@@ -25,21 +25,21 @@ def export_document(
         The exported file path.
 
     Raises:
-        ValueError: If ``output_format`` is unsupported.
+        ValueError: If ``output_type`` is unsupported.
     """
 
     exporters = {
-        "docx": export_word,
+        "docx": export_to_docx,
         "pptx": export_presentation,
         "pdf": export_pdf,
     }
-    normalised_format = output_format.lower()
+    normalised_format = output_type.lower()
 
     try:
         exporter = exporters[normalised_format]
     except KeyError as error:
         raise ValueError(
-            f"Unsupported export format: {output_format}"
+            f"Unsupported export format: {output_type}"
         ) from error
 
-    return exporter(markdown, output_path, title)
+    return exporter(markdown_text, output_path, title)

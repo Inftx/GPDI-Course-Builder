@@ -1,8 +1,10 @@
 from datetime import datetime
+from pathlib import Path
 
 import streamlit as st
 
 from modules.session_manager import get_current_project
+from services.export.export_manager import export_document
 from services.output.output_manager import list_outputs, load_output
 
 
@@ -17,75 +19,86 @@ OUTPUT_TYPES = {
 }
 
 
-st.set_page_config(
-    page_title="AI Output Library",
-    page_icon="📂",
-)
-
-st.title("📂 AI Output Library")
-
-project = get_current_project()
-
-if not project:
-
-    st.warning(
-        "Please select a project first."
+def main() -> None:
+    st.set_page_config(
+        page_title="AI Output Library",
+        page_icon="📂",
     )
 
-    st.stop()
+    st.title("📂 AI Output Library")
 
-output_label = st.selectbox(
-    "Output Type",
-    list(OUTPUT_TYPES),
-)
-output_type = OUTPUT_TYPES[output_label]
-output_files = list_outputs(
-    project,
-    output_type,
-)
+    project = get_current_project()
 
-if not output_files:
+    if not project:
+        st.warning("Please select a project first.")
+        st.stop()
 
-    st.info(
-        "No saved outputs are available for this category."
+    output_label = st.selectbox(
+        "Output Type",
+        list(OUTPUT_TYPES),
+    )
+    output_type = OUTPUT_TYPES[output_label]
+    output_files = list_outputs(
+        project,
+        output_type,
     )
 
-    st.stop()
+    if not output_files:
+        st.info("No saved outputs are available for this category.")
+        st.stop()
 
-selected_file = st.selectbox(
-    "Saved Outputs",
-    output_files,
-    format_func=lambda file_path: file_path.name,
-)
-content = load_output(selected_file)
-created_at = datetime.fromtimestamp(
-    selected_file.stat().st_ctime
-).strftime("%Y-%m-%d %H:%M:%S")
+    selected_file = st.selectbox(
+        "Saved Outputs",
+        output_files,
+        format_func=lambda file_path: file_path.name,
+    )
+    content = load_output(selected_file)
+    created_at = datetime.fromtimestamp(
+        selected_file.stat().st_ctime
+    ).strftime("%Y-%m-%d %H:%M:%S")
 
-st.subheader(selected_file.name)
-st.write(f"Creation Date: {created_at}")
-st.code(
-    content,
-    language="markdown",
-)
+    st.subheader(selected_file.name)
+    st.write(f"Creation Date: {created_at}")
+    st.code(
+        content,
+        language="markdown",
+    )
 
-copy_column, regenerate_column, export_column = st.columns(3)
+    copy_column, regenerate_column, export_column = st.columns(3)
 
-with copy_column:
+    with copy_column:
+        if st.button("📋 Copy Content", use_container_width=True):
+            st.toast(
+                "Use the copy control in the Markdown content above."
+            )
 
-    if st.button("📋 Copy Content", use_container_width=True):
-        st.toast(
-            "Use the copy control in the Markdown content above."
-        )
+    with regenerate_column:
+        if st.button("🔄 Regenerate", use_container_width=True):
+            st.switch_page("pages/4_🤖_AI_Workspace.py")
 
-with regenerate_column:
+    with export_column:
+        if st.button("📄 Export DOCX", use_container_width=True):
+            try:
+                exports_folder = Path("projects") / project / "exports"
+                exports_folder.mkdir(parents=True, exist_ok=True)
 
-    if st.button("🔄 Regenerate", use_container_width=True):
-        st.switch_page("pages/4_🤖_AI_Workspace.py")
+                output_filename = selected_file.stem + ".docx"
+                output_path = exports_folder / output_filename
 
-with export_column:
+                export_document(
+                    content,
+                    "docx",
+                    output_path,
+                    title=selected_file.stem,
+                )
 
-    if st.button("📄 Export", use_container_width=True):
-        st.info(
-            "Export will be available in a future update."
-        )
+                st.success("✅ Document exported successfully")
+                st.write("Saved path:")
+                st.code(str(output_path))
+
+            except Exception as error:
+                st.error(error)
+
+
+if __name__ == "__main__":
+    main()

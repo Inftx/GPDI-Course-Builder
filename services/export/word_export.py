@@ -1,6 +1,8 @@
-"""Placeholder Word document exporter."""
+"""Compatibility wrapper for the Word document exporter."""
 
 from pathlib import Path
+
+from services.export.word_exporter import export_to_docx
 
 
 def export_word(
@@ -8,15 +10,6 @@ def export_word(
     output_path: str | Path,
     title: str | None = None,
 ) -> Path:
-    """Return the intended Word output path without creating a document.
+    """Export Markdown content to a Word document."""
 
-    Args:
-        markdown: Markdown content to export.
-        output_path: Intended destination for the Word document.
-        title: Optional document title.
-
-    Returns:
-        The intended output path.
-    """
-
-    return Path(output_path)
+    return export_to_docx(markdown, output_path, title)
