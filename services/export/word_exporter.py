@@ -4,6 +4,35 @@ import re
 from pathlib import Path
 
 from docx import Document
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.shared import Inches, Pt
+
+
+def _style_paragraph(paragraph, font_size: int | None = None) -> None:
+    """Apply consistent paragraph formatting for body text and lists."""
+
+    paragraph.style.font.name = "Calibri"
+    paragraph.style.font.size = Pt(font_size or 11)
+    paragraph.paragraph_format.space_after = Pt(6)
+    paragraph.paragraph_format.line_spacing = 1.15
+    paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+
+def _style_heading(paragraph, level: int) -> None:
+    """Apply Word heading styling based on the requested heading levels."""
+
+    paragraph.style = f"Heading {level}"
+    paragraph.style.font.name = "Calibri"
+
+    if level == 1:
+        paragraph.style.font.size = Pt(20)
+        paragraph.style.font.bold = True
+    elif level == 2:
+        paragraph.style.font.size = Pt(16)
+        paragraph.style.font.bold = True
+    elif level == 3:
+        paragraph.style.font.size = Pt(14)
+        paragraph.style.font.bold = True
 
 
 def _add_formatted_runs(paragraph, text: str) -> None:
@@ -46,7 +75,22 @@ def export_to_docx(
 
     document = Document()
     document.styles["Normal"].font.name = "Calibri"
-    document.styles["Normal"].font.size = 11
+    document.styles["Normal"].font.size = Pt(11)
+    document.styles["Normal"].paragraph_format.space_after = Pt(6)
+    document.styles["Normal"].paragraph_format.line_spacing = 1.15
+
+    section = document.sections[0]
+    section.top_margin = Inches(1)
+    section.bottom_margin = Inches(1)
+    section.left_margin = Inches(1)
+    section.right_margin = Inches(1)
+
+    for level in (1, 2, 3):
+        heading_style = document.styles[f"Heading {level}"]
+        heading_style.font.name = "Calibri"
+        heading_style.font.bold = True
+        heading_style.font.size = Pt({1: 20, 2: 16, 3: 14}[level])
+        heading_style.paragraph_format.space_after = Pt(6)
 
     lines = markdown_text.splitlines()
     derived_title = None
@@ -58,7 +102,8 @@ def export_to_docx(
             break
 
     heading_title = title or derived_title or "Document"
-    document.add_heading(heading_title, level=1)
+    title_paragraph = document.add_heading(heading_title, level=1)
+    _style_heading(title_paragraph, 1)
     document.add_paragraph()
 
     for line in lines:
@@ -71,22 +116,29 @@ def export_to_docx(
         heading_match = re.match(r"^(#{1,6})\s+(.*)$", stripped)
         if heading_match:
             level = min(len(heading_match.group(1)), 6)
-            document.add_heading(heading_match.group(2).strip(), level=level)
+            heading_paragraph = document.add_heading(
+                heading_match.group(2).strip(),
+                level=level,
+            )
+            _style_heading(heading_paragraph, level)
             continue
 
         bullet_match = re.match(r"^[-*+]\s+(.*)$", stripped)
         if bullet_match:
             paragraph = document.add_paragraph(style="List Bullet")
+            _style_paragraph(paragraph, font_size=11)
             _add_formatted_runs(paragraph, bullet_match.group(1).strip())
             continue
 
         numbered_match = re.match(r"^\d+\.\s+(.*)$", stripped)
         if numbered_match:
             paragraph = document.add_paragraph(style="List Number")
+            _style_paragraph(paragraph, font_size=11)
             _add_formatted_runs(paragraph, numbered_match.group(1).strip())
             continue
 
         paragraph = document.add_paragraph()
+        _style_paragraph(paragraph, font_size=11)
         _add_formatted_runs(paragraph, stripped)
 
     document.save(output_path)
