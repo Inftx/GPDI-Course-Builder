@@ -12,6 +12,7 @@ def export_document(
     output_type: str,
     output_path: str | Path,
     title: str | None = None,
+    include_logo: bool = False,
 ) -> Path:
     """Export Markdown through the selected document exporter.
 
@@ -20,6 +21,7 @@ def export_document(
         output_type: Supported format: ``docx``.
         output_path: Intended destination for the exported file.
         title: Optional document title.
+        include_logo: Include GPDI branding logo in DOCX exports.
 
     Returns:
         The exported file path.
@@ -41,5 +43,13 @@ def export_document(
         raise ValueError(
             f"Unsupported export format: {output_type}"
         ) from error
+
+    if normalised_format == "docx":
+        return exporter(
+            markdown_text,
+            output_path,
+            title,
+            include_logo=include_logo,
+        )
 
     return exporter(markdown_text, output_path, title)

@@ -1,0 +1,112 @@
+[
+    {
+        "job_id": "f89c87e9-cc1b-4a3a-81cc-abe191535efa",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-05T09:31:19.768355Z",
+        "completed_at": "2026-08-05T09:31:22.286771Z",
+        "output_file": null,
+        "error_message": "Failed to connect to Ollama. Please check that Ollama is downloaded, running and accessible. https://ollama.com/download"
+    },
+    {
+        "job_id": "85a7fbda-493d-40ba-8e72-58a04e738ac4",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-05T10:14:47.024429Z",
+        "completed_at": "2026-08-05T10:14:49.124400Z",
+        "output_file": null,
+        "error_message": "Failed to connect to Ollama. Please check that Ollama is downloaded, running and accessible. https://ollama.com/download"
+    },
+    {
+        "job_id": "06a134f5-b89f-44a2-9a53-ed987bb7a47e",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-05T10:29:18.025699Z",
+        "completed_at": "2026-08-05T10:35:30.721003Z",
+        "output_file": null,
+        "error_message": "llama-server reported out-of-memory during startup: ggml_backend_cpu_buffer_type_alloc_buffer: failed to allocate buffer of size 15032385536\nalloc_tensor_range: failed to allocate CPU buffer of size 15032385536\nllama_init_from_model: failed to initialize the context: failed to allocate buffer for kv cache (status code: 500)"
+    },
+    {
+        "job_id": "d51bac6e-4ca8-44bc-9646-f27b76701546",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Running",
+        "started_at": "2026-08-05T10:29:20.083455Z",
+        "completed_at": null,
+        "output_file": null,
+        "error_message": null
+    },
+    {
+        "job_id": "eafa46af-968f-48ed-b21f-6a3799a4cd40",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-05T10:29:20.349243Z",
+        "completed_at": "2026-08-05T10:32:18.023163Z",
+        "output_file": null,
+        "error_message": "llama-server reported out-of-memory during startup: ggml_backend_cpu_buffer_type_alloc_buffer: failed to allocate buffer of size 15032385536\nalloc_tensor_range: failed to allocate CPU buffer of size 15032385536\nllama_init_from_model: failed to initialize the context: failed to allocate buffer for kv cache (status code: 500)"
+    },
+    {
+        "job_id": "b206c679-cd5d-4a11-9782-48c2062b0fbe",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-05T10:29:20.662811Z",
+        "completed_at": "2026-08-05T10:33:52.160498Z",
+        "output_file": null,
+        "error_message": "llama-server reported out-of-memory during startup: ggml_backend_cpu_buffer_type_alloc_buffer: failed to allocate buffer of size 15032385536\nalloc_tensor_range: failed to allocate CPU buffer of size 15032385536\nllama_init_from_model: failed to initialize the context: failed to allocate buffer for kv cache (status code: 500)"
+    },
+    {
+        "job_id": "7a918b29-5031-4803-89d1-87bfbf536a7b",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Running",
+        "started_at": "2026-08-05T10:29:22.079060Z",
+        "completed_at": null,
+        "output_file": null,
+        "error_message": null
+    },
+    {
+        "job_id": "aaaa575c-b2e0-4d2d-bc3b-281bb027462f",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Running",
+        "started_at": "2026-08-05T10:29:23.318567Z",
+        "completed_at": null,
+        "output_file": null,
+        "error_message": null
+    },
+    {
+        "job_id": "37ad1621-da1e-431a-a8a9-eb51f70efc16",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-05T12:20:04.496842Z",
+        "completed_at": "2026-08-05T12:20:06.687340Z",
+        "output_file": null,
+        "error_message": "Failed to connect to Ollama. Please check that Ollama is downloaded, running and accessible. https://ollama.com/download"
+    },
+    {
+        "job_id": "902f2d50-9d5e-40dd-ac91-1ec7655deaac",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-05T12:21:55.627371Z",
+        "completed_at": "2026-08-05T12:21:57.657070Z",
+        "output_file": null,
+        "error_message": "Failed to connect to Ollama. Please check that Ollama is downloaded, running and accessible. https://ollama.com/download"
+    },
+    {
+        "job_id": "76d4dcb1-5e90-48cb-a211-ef6273a572f3",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-05T12:26:50.514208Z",
+        "completed_at": "2026-08-05T12:26:52.576914Z",
+        "output_file": null,
+        "error_message": "Failed to connect to Ollama. Please check that Ollama is downloaded, running and accessible. https://ollama.com/download"
+    }
+]

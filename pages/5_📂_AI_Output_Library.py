@@ -77,6 +77,12 @@ def main() -> None:
             st.switch_page("pages/4_🤖_AI_Workspace.py")
 
     with export_column:
+        include_logo = st.checkbox(
+            "Include GPDI Logo",
+            value=False,
+            help="Insert the logo at the top of the exported DOCX when available.",
+        )
+
         if st.button("📄 Export DOCX", use_container_width=True):
             try:
                 exports_folder = Path("projects") / project / "exports"
@@ -90,6 +96,7 @@ def main() -> None:
                     "docx",
                     output_path,
                     title=selected_file.stem,
+                    include_logo=include_logo,
                 )
 
                 st.success("✅ Document exported successfully")

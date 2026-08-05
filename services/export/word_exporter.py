@@ -7,6 +7,8 @@ from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Inches, Pt
 
+from services.branding import get_branding_settings, get_logo_path, has_logo
+
 
 def _style_paragraph(paragraph, font_size: int | None = None) -> None:
     """Apply consistent paragraph formatting for body text and lists."""
@@ -59,6 +61,7 @@ def export_to_docx(
     markdown_text: str,
     output_path: str | Path,
     title: str | None = None,
+    include_logo: bool = False,
 ) -> Path:
     """Convert Markdown content into a .docx document.
 
@@ -68,6 +71,7 @@ def export_to_docx(
     - Paragraphs
     - Bold inline formatting
     - A document title derived from the first heading or supplied title
+    - Optional GPDI branding logo insertion
     """
 
     output_path = Path(output_path)
@@ -102,6 +106,28 @@ def export_to_docx(
             break
 
     heading_title = title or derived_title or "Document"
+
+    if include_logo and has_logo():
+        logo_path = get_logo_path()
+
+        if logo_path.exists():
+            logo_paragraph = document.add_paragraph()
+            logo_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            logo_run = logo_paragraph.add_run()
+            logo_run.add_picture(str(logo_path), width=Inches(2.2))
+            document.add_paragraph()
+
+            branding_settings = get_branding_settings()
+            company_name = branding_settings.get(
+                "company_name",
+                "Global Prospectus Development Institute",
+            )
+
+            company_paragraph = document.add_paragraph(company_name)
+            _style_paragraph(company_paragraph, font_size=11)
+            company_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            document.add_paragraph()
+
     title_paragraph = document.add_heading(heading_title, level=1)
     _style_heading(title_paragraph, 1)
     document.add_paragraph()
