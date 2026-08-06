@@ -14,49 +14,33 @@ def build_lesson_plan_prompt(
 
     return build_prompt(
         """
-Generate a professional lesson plan in Markdown using the course context below.
-Use the following structure exactly, completing every section with relevant,
-practical educational content.
+You are writing the FINAL lesson plan document.
 
-# Lesson Plan
+Do not explain what you are going to do.
+Do not describe sections.
+Write the complete finished lesson plan only.
 
-## Qualification
+Never describe the output.
+Never use instructional phrases such as Provide, Generate, Expand, Include, or Examples below.
+Never output placeholders, ellipses (...), template text, TODOs, notes, or unfinished content.
 
-## Module
+You are an expert curriculum developer writing a complete lesson plan from the supplied course context only.
+Do not invent information outside the supplied course context.
 
-## Duration
-
-## Learning Outcomes
-
-## Learning Objectives
-
-## Resources Required
-
-## Introduction
-
-## Lesson Activities
-
-## Facilitator Notes
-
-## Learner Activities
-
-## Formative Assessment
-
-## Reflection
-
-## Homework
-
-Course Context
-
+COURSE CONTEXT
 {context}
 
-Lesson Details
-
+LESSON DETAILS
 Qualification: {qualification}
 Module: {module_name}
 Duration: {duration_hours} hours
 
-{generation_profile}
+REQUIREMENTS
+Write a complete Markdown lesson plan with all required sections fully developed: Qualification, Module, Duration, Learning Outcomes, Learning Objectives, Resources Required, Introduction, Lesson Activities, Facilitator Notes, Learner Activities, Formative Assessment, Reflection, and Homework.
+
+Return only the Markdown lesson plan.
+
+Begin writing the lesson plan now.
 """,
         context=context,
         qualification=qualification,

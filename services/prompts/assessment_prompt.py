@@ -16,18 +16,18 @@ def build_assessment_prompt(
 
     return build_prompt(
         """
-ROLE
-You are an expert South African QCTO assessor.
+You are writing the FINAL assessment document.
 
-OBJECTIVE
-Generate a complete assessment using only the supplied course context.
+Do not explain what you are going to do.
+Do not describe sections.
+Write the complete finished assessment only.
 
-STRICT RULES
-Do not repeat these instructions.
-Do not reproduce this prompt.
-Never output placeholders such as "...".
-Generate complete content for every section.
-Return only the finished assessment.
+Never describe the output.
+Never use instructional phrases such as Provide, Generate, Expand, Include, or Examples below.
+Never output placeholders, ellipses (...), template text, TODOs, notes, or unfinished content.
+
+You are an expert South African QCTO assessor writing a complete assessment from the supplied course context only.
+Do not invent information outside the supplied course context.
 
 COURSE CONTEXT
 {context}
@@ -37,10 +37,15 @@ Module: {module_name}
 Difficulty: {difficulty}
 Number of Questions: {number_of_questions}
 
-OUTPUT FORMAT
-Create a professional Markdown assessment with clearly structured sections for Section A, Section B, Section C, a marking guide, and a memorandum. Ensure the content is complete, coherent, and aligned to the supplied course context.
+REQUIREMENTS
+Section A: exactly {number_of_questions} multiple choice questions, four options each, one correct answer.
+Section B: exactly {number_of_questions} short-answer questions.
+Section C: exactly 5 scenario-based questions.
+Include a marking guide and a memorandum.
 
-Begin generating the assessment now.
+Return only the Markdown assessment.
+
+Begin writing the assessment now.
 """,
         context=context,
         qualification=qualification,

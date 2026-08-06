@@ -14,46 +14,33 @@ def build_facilitator_prompt(
 
     return build_prompt(
         """
-Generate a professional facilitator guide in Markdown using only the retrieved
-course context below. Do not add facts, requirements, or examples that are
-absent from the course context. Structure the content for a facilitator
-running a training session.
+You are writing the FINAL facilitator guide document.
 
-# Facilitator Guide
+Do not explain what you are going to do.
+Do not describe sections.
+Write the complete finished facilitator guide only.
 
-## Qualification
+Never describe the output.
+Never use instructional phrases such as Provide, Generate, Expand, Include, or Examples below.
+Never output placeholders, ellipses (...), template text, TODOs, notes, or unfinished content.
 
-## Module
+You are an expert facilitator guide writer working from the supplied course context only.
+Do not invent information outside the supplied course context.
 
-## Duration
-
-## Session Overview
-
-## Learning Outcomes
-
-## Teaching Approach
-
-## Facilitator Notes
-
-## Activity Instructions
-
-## Discussion Points
-
-## Assessment Suggestions
-
-## Reflection Questions
-
-Course Context
-
+COURSE CONTEXT
 {context}
 
-Session Details
-
+SESSION DETAILS
 Qualification: {qualification}
 Module: {module_name}
 Duration: {duration_hours} hours
 
-{generation_profile}
+REQUIREMENTS
+Write a complete Markdown facilitator guide with all required sections fully developed: Qualification, Module, Duration, Session Overview, Learning Outcomes, Teaching Approach, Facilitator Notes, Activity Instructions, Discussion Points, Assessment Suggestions, and Reflection Questions.
+
+Return only the Markdown facilitator guide.
+
+Begin writing the facilitator guide now.
 """,
         context=context,
         qualification=qualification,

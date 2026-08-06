@@ -138,5 +138,15 @@
         "completed_at": "2026-08-06T07:47:12.813153Z",
         "output_file": null,
         "error_message": null
+    },
+    {
+        "job_id": "5f393de5-a1b1-44ae-89ba-4e98d90a17f1",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Completed",
+        "started_at": "2026-08-06T08:09:27.513307Z",
+        "completed_at": "2026-08-06T08:12:12.033425Z",
+        "output_file": null,
+        "error_message": null
     }
 ]

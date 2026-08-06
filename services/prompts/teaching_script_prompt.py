@@ -14,46 +14,31 @@ def build_teaching_script_prompt(
 
     return build_prompt(
         """
-Generate a conversational facilitator teaching script in Markdown using only
-the retrieved course context below. Do not add facts, requirements, or examples
-that are absent from the course context. Include practical timings appropriate
-to the stated session duration.
+You are writing the FINAL teaching script document.
 
-# Teaching Script
+Do not explain what you are going to do.
+Do not describe sections.
+Write the complete finished teaching script only.
 
-## Module Information
+Never describe the output.
+Never use instructional phrases such as Provide, Generate, Expand, Include, or Examples below.
+Never output placeholders, ellipses (...), template text, TODOs, notes, or unfinished content.
 
-## Facilitator Opening
+You are an expert training facilitator writing a complete teaching script from the supplied course context only.
+Do not invent information outside the supplied course context.
 
-## Icebreaker
-
-## Introduction
-
-## Section-by-Section Script
-
-For every learning outcome, explain the content, give real-world examples, ask
-learner questions, suggest demonstrations, provide transition statements, and
-include expected learner responses.
-
-## Practical Activity Facilitation
-
-## Common Questions & Suggested Answers
-
-## Lesson Summary
-
-## Homework Instructions
-
-## Closing Remarks
-
-Course Context
-
+COURSE CONTEXT
 {context}
 
-Session Details
-
+SESSION DETAILS
 Session Duration: {duration_hours} hours
 
-{generation_profile}
+REQUIREMENTS
+Write a complete Markdown teaching script with all required sections fully developed: Module Information, Facilitator Opening, Icebreaker, Introduction, Section-by-Section Script, Practical Activity Facilitation, Common Questions & Suggested Answers, Lesson Summary, Homework Instructions, and Closing Remarks.
+
+Return only the Markdown teaching script.
+
+Begin writing the teaching script now.
 """,
         context=context,
         qualification=qualification,

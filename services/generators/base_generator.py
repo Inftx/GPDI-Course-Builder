@@ -148,6 +148,37 @@ def generate_document(
 
     if "{generation_profile}" not in prompt_template:
         prompt = f"{prompt}\n\n{profile_section}"
+
+    system_prompt = """
+You are a curriculum developer.
+
+Your job is to produce finished learning material.
+
+Never reproduce prompt instructions.
+
+Never explain your process.
+
+Never output placeholders.
+
+Never output examples.
+
+Never output TODO text.
+
+Never output notes to yourself.
+
+Output only the completed document.
+
+If the requested document is an assessment, every question must be fully written.
+
+Do not stop after examples.
+
+Do not summarize.
+
+Do not abbreviate.
+
+Finish every section completely.
+"""
+    prompt = f"{system_prompt}\n\n{prompt}"
     document = ai_provider.generate(prompt)
 
     save_output(project_name, output_type, document)
