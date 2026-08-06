@@ -148,5 +148,65 @@
         "completed_at": "2026-08-06T08:12:12.033425Z",
         "output_file": null,
         "error_message": null
+    },
+    {
+        "job_id": "b4c230c0-613c-40c3-bcc3-eb7328c701c3",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-06T08:30:35.671336Z",
+        "completed_at": "2026-08-06T08:36:08.121104Z",
+        "output_file": null,
+        "error_message": "Assessment generation failed after 3 attempts due to invalid output."
+    },
+    {
+        "job_id": "19b3b2a3-dc42-41ff-9212-8b796fb9e8cd",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-06T08:44:18.186222Z",
+        "completed_at": "2026-08-06T08:48:55.200984Z",
+        "output_file": null,
+        "error_message": "Assessment section generation failed after 3 attempts."
+    },
+    {
+        "job_id": "f8dfac61-ec40-4b0b-8885-182176bb6f6a",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-06T08:46:16.216464Z",
+        "completed_at": "2026-08-06T08:55:24.720485Z",
+        "output_file": null,
+        "error_message": "Assessment section generation failed after 3 attempts."
+    },
+    {
+        "job_id": "cb1d0104-42e2-4bcb-b397-3c4d8e060029",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-06T08:47:00.382407Z",
+        "completed_at": "2026-08-06T08:56:44.413718Z",
+        "output_file": null,
+        "error_message": "Assessment section generation failed after 3 attempts."
+    },
+    {
+        "job_id": "e4d0db72-add0-4f84-9912-5aed804bf7ad",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-06T09:06:47.069325Z",
+        "completed_at": "2026-08-06T09:17:07.783073Z",
+        "output_file": null,
+        "error_message": "Assessment section generation failed after 3 attempts."
+    },
+    {
+        "job_id": "fc4351a9-813e-4bae-929e-2b401e6675e4",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Lesson Plan",
+        "status": "Completed",
+        "started_at": "2026-08-06T09:24:24.303439Z",
+        "completed_at": "2026-08-06T09:27:20.154281Z",
+        "output_file": null,
+        "error_message": null
     }
 ]

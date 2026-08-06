@@ -179,7 +179,16 @@ Do not abbreviate.
 Finish every section completely.
 """
     prompt = f"{system_prompt}\n\n{prompt}"
+
+    print("=== PROMPT START ===")
+    print(prompt)
+    print("=== PROMPT END ===")
+
     document = ai_provider.generate(prompt)
+
+    print("=== RAW RESPONSE START ===")
+    print(document)
+    print("=== RAW RESPONSE END ===")
 
     save_output(project_name, output_type, document)
 
