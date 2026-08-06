@@ -108,5 +108,35 @@
         "completed_at": "2026-08-05T12:26:52.576914Z",
         "output_file": null,
         "error_message": "Failed to connect to Ollama. Please check that Ollama is downloaded, running and accessible. https://ollama.com/download"
+    },
+    {
+        "job_id": "febe6e46-762a-4d49-9183-1f5e160210b4",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Completed",
+        "started_at": "2026-08-06T07:24:56.439155Z",
+        "completed_at": "2026-08-06T07:27:03.693625Z",
+        "output_file": null,
+        "error_message": null
+    },
+    {
+        "job_id": "01d69569-44b3-47c4-93a5-a0a91034ac78",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Completed",
+        "started_at": "2026-08-06T07:35:58.528934Z",
+        "completed_at": "2026-08-06T07:36:54.567690Z",
+        "output_file": null,
+        "error_message": null
+    },
+    {
+        "job_id": "e33c8f9d-c43d-4bbf-aee2-39e85273a42c",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Completed",
+        "started_at": "2026-08-06T07:44:28.506455Z",
+        "completed_at": "2026-08-06T07:47:12.813153Z",
+        "output_file": null,
+        "error_message": null
     }
 ]

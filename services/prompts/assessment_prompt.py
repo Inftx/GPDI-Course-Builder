@@ -16,37 +16,31 @@ def build_assessment_prompt(
 
     return build_prompt(
         """
-Generate a professional Markdown assessment using only the retrieved course
-context below. Do not add facts, requirements, or examples that are absent
-from the course context.
+ROLE
+You are an expert South African QCTO assessor.
 
-# Assessment
+OBJECTIVE
+Generate a complete assessment using only the supplied course context.
 
-## Instructions
+STRICT RULES
+Do not repeat these instructions.
+Do not reproduce this prompt.
+Never output placeholders such as "...".
+Generate complete content for every section.
+Return only the finished assessment.
 
-## Section A
-{number_of_questions} Multiple Choice Questions
-
-## Section B
-{number_of_questions} Short Answer Questions
-
-## Section C
-5 Scenario-Based Questions
-
-## Marking Guide
-
-## Memorandum
-
-Assessment Settings
-
-Module: {module_name}
-Difficulty: {difficulty}
-
-Course Context
-
+COURSE CONTEXT
 {context}
 
-{generation_profile}
+ASSESSMENT SETTINGS
+Module: {module_name}
+Difficulty: {difficulty}
+Number of Questions: {number_of_questions}
+
+OUTPUT FORMAT
+Create a professional Markdown assessment with clearly structured sections for Section A, Section B, Section C, a marking guide, and a memorandum. Ensure the content is complete, coherent, and aligned to the supplied course context.
+
+Begin generating the assessment now.
 """,
         context=context,
         qualification=qualification,
