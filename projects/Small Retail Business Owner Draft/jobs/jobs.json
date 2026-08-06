@@ -208,5 +208,45 @@
         "completed_at": "2026-08-06T09:27:20.154281Z",
         "output_file": null,
         "error_message": null
+    },
+    {
+        "job_id": "9b2dd5bd-e491-434b-ab91-abfd270150cc",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Teaching Script",
+        "status": "Completed",
+        "started_at": "2026-08-06T12:26:26.184391Z",
+        "completed_at": "2026-08-06T12:30:50.455594Z",
+        "output_file": null,
+        "error_message": null
+    },
+    {
+        "job_id": "6f7caab4-04ae-41ff-a7cb-800fdf4686e4",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Teaching Script",
+        "status": "Completed",
+        "started_at": "2026-08-06T12:30:50.999990Z",
+        "completed_at": "2026-08-06T12:33:51.114041Z",
+        "output_file": null,
+        "error_message": null
+    },
+    {
+        "job_id": "3aefeba4-1670-4e97-be86-06e1f46be704",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Teaching Script",
+        "status": "Completed",
+        "started_at": "2026-08-06T12:33:52.944287Z",
+        "completed_at": "2026-08-06T12:37:10.965713Z",
+        "output_file": null,
+        "error_message": null
+    },
+    {
+        "job_id": "34141c57-4076-4274-af61-95e39cf5a560",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Teaching Script",
+        "status": "Completed",
+        "started_at": "2026-08-06T12:37:17.646695Z",
+        "completed_at": "2026-08-06T12:40:16.432693Z",
+        "output_file": null,
+        "error_message": null
     }
 ]
