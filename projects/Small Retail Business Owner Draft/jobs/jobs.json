@@ -248,5 +248,45 @@
         "completed_at": "2026-08-06T12:40:16.432693Z",
         "output_file": null,
         "error_message": null
+    },
+    {
+        "job_id": "d9062130-3153-4c75-a397-9bf2dd19bc00",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-18T18:25:01.967252Z",
+        "completed_at": "2026-08-18T18:25:04.321012Z",
+        "output_file": null,
+        "error_message": "Failed to connect to Ollama. Please check that Ollama is downloaded, running and accessible. https://ollama.com/download"
+    },
+    {
+        "job_id": "fc504728-0f01-4d87-92ae-ac6fc51883ba",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-18T19:42:21.588678Z",
+        "completed_at": "2026-08-18T19:51:24.824287Z",
+        "output_file": null,
+        "error_message": "Assessment section generation failed after 3 attempts."
+    },
+    {
+        "job_id": "c61577e0-8ada-42e3-86f4-bb37d0df4e1a",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-18T20:27:59.889807Z",
+        "completed_at": "2026-08-18T20:30:31.580534Z",
+        "output_file": null,
+        "error_message": "Assessment section generation failed validation after 3 attempts. The AI response did not match the required structure."
+    },
+    {
+        "job_id": "767522b1-deab-4c82-b00a-2fc834a4e784",
+        "project_name": "Small Retail Business Owner Draft",
+        "task_type": "Assessment",
+        "status": "Failed",
+        "started_at": "2026-08-18T21:54:22.675522Z",
+        "completed_at": "2026-08-18T22:00:55.217252Z",
+        "output_file": null,
+        "error_message": "Assessment section generation failed after 3 attempts."
     }
 ]

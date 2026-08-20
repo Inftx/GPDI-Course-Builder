@@ -25,6 +25,7 @@ st.set_page_config(
 
 st.title("📄 Upload Documents")
 
+
 # --------------------------------------------------
 # CURRENT PROJECT
 # --------------------------------------------------
@@ -32,12 +33,15 @@ st.title("📄 Upload Documents")
 project = get_current_project()
 
 if not project:
-    st.warning("Please select a project from the Project Manager first.")
+    st.warning(
+        "Please select a project from the Project Manager first."
+    )
     st.stop()
 
 st.success(f"Current Project: {project}")
 
 st.divider()
+
 
 # --------------------------------------------------
 # FILE UPLOAD
@@ -55,22 +59,23 @@ uploaded_file = st.file_uploader(
     ]
 )
 
+
 if uploaded_file:
 
     with st.spinner("Processing document..."):
 
-        # ------------------------------
-        # Save Original Document
-        # ------------------------------
+        # --------------------------------------------------
+        # SAVE ORIGINAL DOCUMENT
+        # --------------------------------------------------
 
         save_uploaded_file(
             uploaded_file,
             project
         )
 
-        # ------------------------------
-        # Process Document
-        # ------------------------------
+        # --------------------------------------------------
+        # PROCESS DOCUMENT
+        # --------------------------------------------------
 
         result = process_document(
             uploaded_file
@@ -80,9 +85,9 @@ if uploaded_file:
         cleaned_text = result["clean"]
         structured_text = result["structured"]
 
-        # ------------------------------
-        # Save Cleaned Text
-        # ------------------------------
+        # --------------------------------------------------
+        # SAVE CLEANED TEXT
+        # --------------------------------------------------
 
         save_extracted_text(
             cleaned_text,
@@ -90,9 +95,9 @@ if uploaded_file:
             project
         )
 
-        # ------------------------------
-        # Save Structured Text
-        # ------------------------------
+        # --------------------------------------------------
+        # SAVE STRUCTURED TEXT
+        # --------------------------------------------------
 
         save_formatted_text(
             structured_text,
@@ -100,17 +105,17 @@ if uploaded_file:
             project
         )
 
-        # ------------------------------
-        # Analyse Document
-        # ------------------------------
+        # --------------------------------------------------
+        # ANALYSE DOCUMENT
+        # --------------------------------------------------
 
         analysis = analyze_document(
             structured_text
         )
 
-        # ------------------------------
-        # Build Knowledge Base
-        # ------------------------------
+        # --------------------------------------------------
+        # BUILD KNOWLEDGE BASE
+        # --------------------------------------------------
 
         knowledge = build_knowledge(
             structured_text,
@@ -118,9 +123,9 @@ if uploaded_file:
             project
         )
 
-        # ------------------------------
-        # Save Metadata
-        # ------------------------------
+        # --------------------------------------------------
+        # SAVE METADATA
+        # --------------------------------------------------
 
         save_document_metadata(
             project,
@@ -128,9 +133,17 @@ if uploaded_file:
             analysis
         )
 
-    st.success("✅ Document processed successfully.")
+
+    # --------------------------------------------------
+    # SUCCESS
+    # --------------------------------------------------
+
+    st.success(
+        "✅ Document processed successfully."
+    )
 
     st.divider()
+
 
     # --------------------------------------------------
     # DOCUMENT STATISTICS
@@ -164,7 +177,9 @@ if uploaded_file:
             f"{analysis['reading_time']} min"
         )
 
+
     st.divider()
+
 
     # --------------------------------------------------
     # DOCUMENT TABS
@@ -173,8 +188,9 @@ if uploaded_file:
     raw_tab, clean_tab, structured_tab = st.tabs([
         "📄 Raw Text",
         "🧹 Cleaned Text",
-        "🧠 Structured Document"
+        "🗂️ Structured Document"
     ])
+
 
     with raw_tab:
 
@@ -184,6 +200,7 @@ if uploaded_file:
             height=500
         )
 
+
     with clean_tab:
 
         st.text_area(
@@ -191,6 +208,7 @@ if uploaded_file:
             value=cleaned_text,
             height=500
         )
+
 
     with structured_tab:
 
@@ -200,7 +218,9 @@ if uploaded_file:
             height=500
         )
 
+
     st.divider()
+
 
     # --------------------------------------------------
     # DETECTED HEADINGS
@@ -216,9 +236,13 @@ if uploaded_file:
 
     else:
 
-        st.info("No headings detected.")
+        st.info(
+            "No headings detected."
+        )
+
 
     st.divider()
+
 
     # --------------------------------------------------
     # TOP KEYWORDS
@@ -230,40 +254,220 @@ if uploaded_file:
 
         for word, count in analysis["keywords"]:
 
-            st.write(f"**{word}** ({count})")
+            st.write(
+                f"**{word}** ({count})"
+            )
 
     else:
 
-        st.info("No keywords detected.")
+        st.info(
+            "No keywords detected."
+        )
+
 
     st.divider()
 
+
     # --------------------------------------------------
-    # KNOWLEDGE BASE
+    # KNOWLEDGE BASE SUMMARY
     # --------------------------------------------------
 
     st.subheader("🧠 Knowledge Base Summary")
 
-    col1, col2, col3 = st.columns(3)
+
+    module = knowledge.get(
+        "module",
+        {}
+    )
+
+    knowledge_topics = knowledge.get(
+        "knowledge_topics",
+        []
+    )
+
+    learning_outcomes = knowledge.get(
+        "learning_outcomes",
+        []
+    )
+
+    assessment_criteria = knowledge.get(
+        "assessment_criteria",
+        []
+    )
+
+    knowledge_requirements = knowledge.get(
+        "knowledge_requirements",
+        []
+    )
+
+    practical_activities = knowledge.get(
+        "practical_activities",
+        []
+    )
+
+    workplace_activities = knowledge.get(
+        "workplace_activities",
+        []
+    )
+
+    warnings = knowledge.get(
+        "warnings",
+        []
+    )
+
+
+    total_knowledge_items = sum(
+        len(topic.get("knowledge_items", []))
+        for topic in knowledge_topics
+    )
+
+
+    # --------------------------------------------------
+    # SUMMARY METRICS
+    # --------------------------------------------------
+
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
+
         st.metric(
-            "Modules",
-            len(knowledge["modules"])
+            "Knowledge Module",
+            module.get("code") or "Not detected"
         )
 
     with col2:
+
         st.metric(
-            "Learning Outcomes",
-            len(knowledge["learning_outcomes"])
+            "Knowledge Topics",
+            len(knowledge_topics)
         )
 
     with col3:
+
         st.metric(
-            "Assessment Criteria",
-            len(knowledge["assessment_criteria"])
+            "Knowledge Items",
+            total_knowledge_items
         )
 
-    with st.expander("View Knowledge Base"):
+    with col4:
+
+        st.metric(
+            "Warnings",
+            len(warnings)
+        )
+
+
+    st.divider()
+
+
+    # --------------------------------------------------
+    # KNOWLEDGE TOPICS
+    # --------------------------------------------------
+
+    st.subheader("📚 Knowledge Topics")
+
+
+    if knowledge_topics:
+
+        for topic in knowledge_topics:
+
+            topic_code = topic.get(
+                "code",
+                "Unknown"
+            )
+
+            topic_title = topic.get(
+                "title",
+                "Untitled Topic"
+            )
+
+            items = topic.get(
+                "knowledge_items",
+                []
+            )
+
+            with st.expander(
+                f"{topic_code} - {topic_title}"
+            ):
+
+                st.write(
+                    f"**Knowledge Items:** {len(items)}"
+                )
+
+                for item in items:
+
+                    st.markdown(
+                        f"- **{item['code']}** "
+                        f"{item['description']}"
+                    )
+
+    else:
+
+        st.info(
+            "No Knowledge Topics detected."
+        )
+
+
+    # --------------------------------------------------
+    # OTHER STRUCTURED INFORMATION
+    # --------------------------------------------------
+
+    st.divider()
+
+    st.subheader("📋 Additional Information")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+
+        st.metric(
+            "Learning Outcomes",
+            len(learning_outcomes)
+        )
+
+    with col2:
+
+        st.metric(
+            "Assessment Criteria",
+            len(assessment_criteria)
+        )
+
+    with col3:
+
+        st.metric(
+            "Practical Activities",
+            len(practical_activities)
+        )
+
+    with col4:
+
+        st.metric(
+            "Workplace Activities",
+            len(workplace_activities)
+        )
+
+
+    # --------------------------------------------------
+    # WARNINGS
+    # --------------------------------------------------
+
+    if warnings:
+
+        st.divider()
+
+        st.subheader("⚠️ Parser Warnings")
+
+        for warning in warnings:
+
+            st.warning(warning)
+
+
+    # --------------------------------------------------
+    # RAW KNOWLEDGE JSON
+    # --------------------------------------------------
+
+    with st.expander(
+        "🔍 View Complete Knowledge JSON"
+    ):
 
         st.json(knowledge)

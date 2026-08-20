@@ -8,41 +8,33 @@ from services.ai.ai_provider import AIProvider
 class OllamaProvider(AIProvider):
 
     def __init__(self):
-
         self.model = self._resolve_model()
 
     @staticmethod
     def _resolve_model():
-
         configured_model = os.getenv("OLLAMA_MODEL")
 
         if configured_model and configured_model.strip():
-
             return configured_model.strip()
 
-        return "gemma3:1b"
+        return "qwen2.5:3b"
 
-    def generate(
-        self,
-        prompt
-    ):
+    def generate(self, prompt):
+        try:
+            response = ollama.chat(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
+            )
 
-        response = ollama.chat(
+            return response["message"]["content"]
 
-            model=self.model,
-
-            messages=[
-
-                {
-
-                    "role": "user",
-
-                    "content": prompt
-
-                }
-
-            ]
-
-        )
-
-        return response["message"]["content"]
+        except Exception as exc:
+            raise RuntimeError(
+                f"Ollama generation failed using model "
+                f"'{self.model}': {exc}"
+            ) from exc

@@ -150,33 +150,17 @@ def generate_document(
         prompt = f"{prompt}\n\n{profile_section}"
 
     system_prompt = """
-You are a curriculum developer.
+You are a curriculum developer creating professional learning and assessment material.
 
-Your job is to produce finished learning material.
+Use the supplied course context as the main source of content.
 
-Never reproduce prompt instructions.
+Follow the requested document type, section, question count, difficulty, audience, and formatting requirements.
 
-Never explain your process.
+Produce complete, useful content suitable for learners and facilitators.
 
-Never output placeholders.
+Do not discuss your reasoning or the generation process.
 
-Never output examples.
-
-Never output TODO text.
-
-Never output notes to yourself.
-
-Output only the completed document.
-
-If the requested document is an assessment, every question must be fully written.
-
-Do not stop after examples.
-
-Do not summarize.
-
-Do not abbreviate.
-
-Finish every section completely.
+Return the requested content directly.
 """
     prompt = f"{system_prompt}\n\n{prompt}"
 

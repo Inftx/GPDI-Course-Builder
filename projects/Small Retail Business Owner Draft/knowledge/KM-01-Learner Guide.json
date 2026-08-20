@@ -1,11 +1,181 @@
 {
     "document": "KM-01-Learner Guide.docx",
-    "modules": [
-        "KNOWLEDGE MODULE"
+    "module": {
+        "code": "KM-01",
+        "title": "Knowledge Module"
+    },
+    "knowledge_topics": [
+        {
+            "code": "KM-01-KT01",
+            "title": "Legislative Requirements",
+            "description": "KM-01-KT01: Legislative Requirements (25%)",
+            "knowledge_items": [
+                {
+                    "code": "KT0101",
+                    "description": "Knowledge and application of rules and regulations that govern the establishment and running of a business in South Africa."
+                },
+                {
+                    "code": "KT0102",
+                    "description": "Types of businesses and the business as a legal structure."
+                },
+                {
+                    "code": "KT0103",
+                    "description": "Registration of the business with the Companies and Intellectual Property Commission (CIPC)."
+                },
+                {
+                    "code": "KT0104",
+                    "description": "Tax Laws which include the registration with the South African Revenue Services (SARS) as a tax payer (provisional tax payer ), the meaning and purpose of the Income Tax Act, No. 58 of 1962, compliance with tax legislation such as the Value-Added Act, No. 89 of 1991."
+                },
+                {
+                    "code": "KT0105",
+                    "description": "SARS compliance requirements which may include but are not limited to UIF, PAYE, etc."
+                },
+                {
+                    "code": "KT0106",
+                    "description": "Compliance with Municipal By-Laws."
+                },
+                {
+                    "code": "KT0107",
+                    "description": "Key considerations for establishing and forming a business. These may include but are not limited to the nature and size of the business, cost of administration, security, finances, type of products or commodities, marketing and advertising, etc."
+                },
+                {
+                    "code": "KT0108",
+                    "description": "Legal requirements to be met. These"
+                }
+            ]
+        },
+        {
+            "code": "KM-01-KT02",
+            "title": "The Business Plan",
+            "description": "KM-01-KT02: The Business Plan (25%)",
+            "knowledge_items": [
+                {
+                    "code": "KT0201",
+                    "description": "The role of a business plan in a business."
+                },
+                {
+                    "code": "KT0202",
+                    "description": "Reason for a business plan."
+                },
+                {
+                    "code": "KT0203",
+                    "description": "Definition of a business plan."
+                },
+                {
+                    "code": "KT0204",
+                    "description": "The importance and value of the business plan."
+                },
+                {
+                    "code": "KT0205",
+                    "description": "Factors to consider when drawing up a business plan which may include but are not limited to content of the business plan, what should be covered in the business plan, how detailed should it be, what part of a business plan must be created first, how to develop a business plan with no financial aid, how and where to present a business plan."
+                },
+                {
+                    "code": "KT0206",
+                    "description": "Feasibility study."
+                },
+                {
+                    "code": "KT0207",
+                    "description": "Using the business plan to secure funding."
+                },
+                {
+                    "code": "KT0208",
+                    "description": "Using the business plan to evaluate or measure progress and success of the business."
+                },
+                {
+                    "code": "KT0209",
+                    "description": "The importance of record keeping. Examples of records to be kept may include but is not limited to: attendance register, overtime, pay slips, records related to leave – all types (holiday, sick and family responsibility)."
+                }
+            ]
+        },
+        {
+            "code": "KM-01-KT03",
+            "title": "Factors That Affect the Business",
+            "description": "KM-01-KT03: Factors That Affect the Business (25%)",
+            "knowledge_items": [
+                {
+                    "code": "KT0301",
+                    "description": "Understanding factors that influence economic activities. Factors may include but are not limited to legislation, pandemics/ phenomenon, geographical location, unrest, market segmentation, etc."
+                },
+                {
+                    "code": "KT0302",
+                    "description": "Understanding the market mechanisms in the value chain."
+                },
+                {
+                    "code": "KT0303",
+                    "description": "Concepts of supply and demand."
+                },
+                {
+                    "code": "KT0304",
+                    "description": "Target market and finding the market niche."
+                },
+                {
+                    "code": "KT0305",
+                    "description": "Stakeholders and role-players in a business."
+                },
+                {
+                    "code": "KT0306",
+                    "description": "Competitors, suppliers and customers."
+                },
+                {
+                    "code": "KT0307",
+                    "description": "Marketing and advertising. Different types of marketing strategies such as webpage, emails, social media, cold calls, etc."
+                },
+                {
+                    "code": "KT0308",
+                    "description": "Drawing up contracts and Service Level Agreements."
+                },
+                {
+                    "code": "KT0309",
+                    "description": "Differences between a formal and informal contract."
+                },
+                {
+                    "code": "KT03110",
+                    "description": "Documents to complete for various transactions and safe keeping (record keeping). Transactions documents may include but are not limited to quotations, invoices, debit notes, credit notes, receipt book, etc."
+                }
+            ]
+        },
+        {
+            "code": "KM-01-KT04",
+            "title": "Basic Human Resource Management for Small Retail Business",
+            "description": "KM-01-KT04: Basic Human Resource Management for Small Retail Business (25%)",
+            "knowledge_items": [
+                {
+                    "code": "KT0401",
+                    "description": "Identification of potential staff members with the required skills for various jobs within the small retail business."
+                },
+                {
+                    "code": "KT0402",
+                    "description": "Selection and hiring of staff members."
+                },
+                {
+                    "code": "KT0403",
+                    "description": "Orientation of newly appointed staff members."
+                },
+                {
+                    "code": "KT0404",
+                    "description": "Offering work related training to staff members to improve performance."
+                },
+                {
+                    "code": "KT0405",
+                    "description": "Monitoring staff performance and providing feedback and guidance."
+                },
+                {
+                    "code": "KT0406",
+                    "description": "Applying the relevant legislative requirements to handle misconduct."
+                },
+                {
+                    "code": "KT0407",
+                    "description": "Adhering to the relevant legislation when handling staff members information."
+                }
+            ]
+        }
     ],
     "learning_outcomes": [],
     "assessment_criteria": [],
     "knowledge_requirements": [],
     "practical_activities": [],
-    "workplace_activities": []
+    "workplace_activities": [],
+    "warnings": [
+        "Unusual knowledge code detected: KT03110"
+    ]
 }

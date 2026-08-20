@@ -1,113 +1,329 @@
 import json
+import re
 from pathlib import Path
 
+
+# ---------------------------------------------------------
+# NORMALISATION
+# ---------------------------------------------------------
+
+def normalize(line):
+    """
+    Clean whitespace while preserving the actual text.
+    """
+    return " ".join(line.strip().split())
+
+
+# ---------------------------------------------------------
+# MODULE DETECTION
+# ---------------------------------------------------------
+
+def parse_module_code(line):
+    """
+    Detect a standalone Knowledge Module code.
+
+    Supported examples:
+        KM-01
+        KM – 01
+        KM — 01
+        KM 01
+
+    Returns:
+        KM-01
+        or None
+    """
+
+    normalized = normalize(line)
+
+    pattern = re.compile(
+        r"^KM\s*(?:-|–|—)?\s*(\d{2})$",
+        re.IGNORECASE
+    )
+
+    match = pattern.match(normalized)
+
+    if not match:
+        return None
+
+    return f"KM-{match.group(1)}"
+
+
+def is_knowledge_module_heading(line):
+    """
+    Detect the generic Knowledge Module heading.
+    """
+
+    return normalize(line).upper() == "KNOWLEDGE MODULE"
+
+
+# ---------------------------------------------------------
+# KNOWLEDGE TOPIC DETECTION
+# ---------------------------------------------------------
+
+def parse_knowledge_topic(line):
+    """
+    Detect Knowledge Topic headings.
+
+    Examples:
+        KM-01-KT01: Legislative Requirements (25%)
+        KM-01-KT02: The Business Plan (25%)
+    """
+
+    pattern = re.compile(
+        r"^(KM-\d{2}-KT\d{2})\s*:\s*(.+?)(?:\s*\(\d+%\))?$",
+        re.IGNORECASE
+    )
+
+    match = pattern.match(line)
+
+    if not match:
+        return None
+
+    code = match.group(1).upper()
+    title = match.group(2).strip()
+
+    return {
+        "code": code,
+        "title": title,
+        "description": line,
+        "knowledge_items": []
+    }
+
+
+# ---------------------------------------------------------
+# KNOWLEDGE ITEM DETECTION
+# ---------------------------------------------------------
+
+def parse_knowledge_item(line):
+    """
+    Detect individual knowledge items.
+
+    Normal format:
+        KT0101
+        KT0205
+        KT0407
+
+    The parser also accepts unusual five-digit codes such as:
+        KT03110
+
+    Unusual codes are preserved and reported as warnings.
+    """
+
+    pattern = re.compile(
+        r"^(KT\d{4,5})\s+(.+)$",
+        re.IGNORECASE
+    )
+
+    match = pattern.match(line)
+
+    if not match:
+        return None
+
+    code = match.group(1).upper()
+    description = match.group(2).strip()
+
+    return {
+        "code": code,
+        "description": description
+    }
+
+
+# ---------------------------------------------------------
+# BUILD KNOWLEDGE STRUCTURE
+# ---------------------------------------------------------
 
 def build_knowledge(
     structured_text,
     original_filename,
     project_name
 ):
-    """
-    Builds and saves a structured knowledge base
-    from an educational document.
-    """
 
     knowledge = {
-
         "document": original_filename,
 
-        "modules": [],
+        "module": {
+            "code": None,
+            "title": None
+        },
+
+        "knowledge_topics": [],
 
         "learning_outcomes": [],
-
         "assessment_criteria": [],
-
         "knowledge_requirements": [],
-
         "practical_activities": [],
+        "workplace_activities": [],
 
-        "workplace_activities": []
-
+        "warnings": []
     }
 
-    current_section = None
+    current_topic = None
 
-    for line in structured_text.splitlines():
+    # Track warnings so the same warning is only reported once.
+    warning_set = set()
 
-        line = line.strip()
+    # Track unusual knowledge codes so each is warned about once.
+    unusual_codes = set()
+
+    # -----------------------------------------------------
+    # PROCESS DOCUMENT
+    # -----------------------------------------------------
+
+    for raw_line in structured_text.splitlines():
+
+        line = normalize(raw_line)
 
         if not line:
             continue
 
-        upper = line.upper()
+        # Ignore visual separators
+        if set(line) <= {"=", "-", "–", "—"}:
+            continue
 
-        # ----------------------------
-        # MODULES
-        # ----------------------------
+        # -------------------------------------------------
+        # GENERIC KNOWLEDGE MODULE HEADING
+        # -------------------------------------------------
 
-        if (
-            upper.startswith("MODULE")
-            or upper.startswith("KNOWLEDGE MODULE")
-            or upper.startswith("PRACTICAL MODULE")
-            or upper.startswith("WORK EXPERIENCE MODULE")
-        ):
-
-            knowledge["modules"].append(line)
-
-            current_section = None
+        if is_knowledge_module_heading(line):
 
             continue
 
-        # ----------------------------
-        # SECTION HEADINGS
-        # ----------------------------
+        # -------------------------------------------------
+        # STANDALONE KM CODE
+        # -------------------------------------------------
 
-        if upper == "LEARNING OUTCOMES":
+        module_code = parse_module_code(line)
 
-            current_section = "learning_outcomes"
+        if module_code:
+
+            knowledge["module"]["code"] = module_code
+
             continue
 
-        if upper == "ASSESSMENT CRITERIA":
+        # -------------------------------------------------
+        # KNOWLEDGE TOPIC
+        # -------------------------------------------------
 
-            current_section = "assessment_criteria"
+        topic = parse_knowledge_topic(line)
+
+        if topic:
+
+            # Prevent duplicate KT headings.
+            existing = next(
+                (
+                    item
+                    for item in knowledge["knowledge_topics"]
+                    if item["code"] == topic["code"]
+                ),
+                None
+            )
+
+            if existing:
+
+                current_topic = existing
+
+            else:
+
+                knowledge["knowledge_topics"].append(topic)
+
+                current_topic = topic
+
             continue
 
-        if upper == "KNOWLEDGE REQUIREMENTS":
+        # -------------------------------------------------
+        # KNOWLEDGE ITEM
+        # -------------------------------------------------
 
-            current_section = "knowledge_requirements"
+        item = parse_knowledge_item(line)
+
+        if item:
+
+            # Knowledge item before a topic.
+            if current_topic is None:
+
+                warning = (
+                    "Knowledge item found before a Knowledge Topic: "
+                    f"{item['code']}"
+                )
+
+                if warning not in warning_set:
+
+                    knowledge["warnings"].append(warning)
+                    warning_set.add(warning)
+
+                continue
+
+            # -------------------------------------------------
+            # Detect suspicious KT codes
+            # -------------------------------------------------
+
+            if len(item["code"]) != 6:
+
+                if item["code"] not in unusual_codes:
+
+                    warning = (
+                        "Unusual knowledge code detected: "
+                        f"{item['code']}"
+                    )
+
+                    knowledge["warnings"].append(warning)
+
+                    warning_set.add(warning)
+                    unusual_codes.add(item["code"])
+
+            # -------------------------------------------------
+            # Prevent duplicate knowledge items
+            # -------------------------------------------------
+
+            existing_codes = {
+                x["code"]
+                for x in current_topic["knowledge_items"]
+            }
+
+            if item["code"] not in existing_codes:
+
+                current_topic["knowledge_items"].append(item)
+
             continue
 
-        if upper == "PRACTICAL ACTIVITIES":
+    # ---------------------------------------------------------
+    # SET MODULE TITLE
+    # ---------------------------------------------------------
 
-            current_section = "practical_activities"
-            continue
+    if knowledge["knowledge_topics"]:
 
-        if upper == "WORKPLACE ACTIVITIES":
+        knowledge["module"]["title"] = "Knowledge Module"
 
-            current_section = "workplace_activities"
-            continue
+    # ---------------------------------------------------------
+    # CHECK FOR EMPTY TOPICS
+    # ---------------------------------------------------------
 
-        # Ignore divider lines
+    for topic in knowledge["knowledge_topics"]:
 
-        if (
-            line.startswith("=")
-            or line.startswith("-")
-        ):
-            continue
+        if not topic["knowledge_items"]:
 
-        # Store content
+            warning = (
+                f"{topic['code']} contains no knowledge items."
+            )
 
-        if current_section:
+            if warning not in warning_set:
 
-            knowledge[current_section].append(line)
+                knowledge["warnings"].append(warning)
+                warning_set.add(warning)
 
-    # ----------------------------
-    # SAVE JSON
-    # ----------------------------
+    # ---------------------------------------------------------
+    # SAVE
+    # ---------------------------------------------------------
 
-    project_folder = Path("projects") / project_name
+    project_folder = (
+        Path("projects") /
+        project_name
+    )
 
-    knowledge_folder = project_folder / "knowledge"
+    knowledge_folder = (
+        project_folder /
+        "knowledge"
+    )
 
     knowledge_folder.mkdir(
         parents=True,
@@ -116,7 +332,7 @@ def build_knowledge(
 
     output_file = (
         knowledge_folder /
-        (Path(original_filename).stem + ".json")
+        f"{Path(original_filename).stem}.json"
     )
 
     with open(
