@@ -6,6 +6,9 @@ from typing import Any
 class GenerationWizardState:
     project: str | None = None
     module: str | None = None
+    module_label: str | None = None
+    knowledge_topic: str | None = None
+    knowledge_topic_label: str | None = None
     output_type: str | None = None
     options: dict[str, Any] = field(default_factory=dict)
     step: int = 1
@@ -40,10 +43,27 @@ class GenerationWizard:
             self._state.step = step
 
     def set_project(self, name: str) -> None:
+        if self._state.project != name:
+            self._state.module = None
+            self._state.module_label = None
+            self._state.knowledge_topic = None
+            self._state.knowledge_topic_label = None
         self._state.project = name
 
-    def set_module(self, name: str) -> None:
-        self._state.module = name
+    def set_module(self, identifier: str, label: str | None = None) -> None:
+        if self._state.module != identifier:
+            self._state.knowledge_topic = None
+            self._state.knowledge_topic_label = None
+        self._state.module = identifier
+        self._state.module_label = label or identifier
+
+    def set_knowledge_topic(
+        self,
+        identifier: str | None,
+        label: str | None = None,
+    ) -> None:
+        self._state.knowledge_topic = identifier
+        self._state.knowledge_topic_label = label or identifier
 
     def set_output_type(self, output_type: str) -> None:
         self._state.output_type = output_type

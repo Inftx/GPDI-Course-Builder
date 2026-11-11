@@ -42,6 +42,8 @@ Section A: exactly {number_of_questions} multiple choice questions, four options
 Section B: exactly {number_of_questions} short-answer questions.
 Section C: exactly 5 scenario-based questions.
 Include a marking guide and a memorandum.
+Write original questions based on the source facts. Do not copy or reuse
+questions, answer keys, or assessment templates found in the course material.
 
 Return only the Markdown assessment.
 

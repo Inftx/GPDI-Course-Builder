@@ -53,11 +53,12 @@ def _get_heading(line):
     return None
 
 
-def chunk_document(text):
+def chunk_document(text: str, max_chars: int | None = None) -> list[dict[str, str]]:
     """Split document text into ordered chunks at recognised section headings.
 
     Each returned chunk is a dictionary with ``title`` and ``content`` keys.
     Text before the first recognised heading is retained in a ``Document`` chunk.
+    When ``max_chars`` is set, large sections are split into bounded chunks.
     """
 
     chunks = []
@@ -94,4 +95,35 @@ def chunk_document(text):
             }
         )
 
-    return chunks
+    if max_chars is None:
+        return chunks
+    if max_chars < 1:
+        raise ValueError("max_chars must be a positive integer.")
+
+    bounded_chunks = []
+    for chunk in chunks:
+        content = chunk["content"]
+        if len(content) <= max_chars:
+            bounded_chunks.append(chunk)
+            continue
+
+        parts = []
+        start = 0
+        while start < len(content):
+            end = min(start + max_chars, len(content))
+            if end < len(content):
+                newline = content.rfind("\n", start, end)
+                if newline > start:
+                    end = newline + 1
+            parts.append(content[start:end].strip())
+            start = end
+
+        for part_number, part in enumerate(parts, start=1):
+            bounded_chunks.append(
+                {
+                    "title": f"{chunk['title']} (part {part_number})",
+                    "content": part,
+                }
+            )
+
+    return bounded_chunks

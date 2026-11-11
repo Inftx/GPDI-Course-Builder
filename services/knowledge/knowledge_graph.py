@@ -34,7 +34,6 @@ def build_knowledge_graph(course_data: dict[str, Any]) -> dict[str, Any]:
     and preserves the original order of modules and entries.
     """
 
-    modules = course_data.get("modules", []) or []
     learning_outcomes = course_data.get("learning_outcomes", []) or []
     assessment_criteria = course_data.get("assessment_criteria", []) or []
     knowledge_requirements = course_data.get("knowledge_requirements", []) or []
@@ -44,17 +43,101 @@ def build_knowledge_graph(course_data: dict[str, Any]) -> dict[str, Any]:
     graph_modules: list[dict[str, Any]] = []
     seen_module_names: set[str] = set()
 
-    for module_name in modules:
-        if not module_name or module_name in seen_module_names:
-            continue
+    def add_module(module_name: str, aliases: list[str] | None = None) -> None:
+        if not module_name:
+            return
+        normalized_aliases = {
+            str(alias).strip().casefold()
+            for alias in (aliases or [])
+            if alias
+        }
+        existing = next(
+            (
+                module
+                for module in graph_modules
+                if module_name.strip().casefold()
+                in {
+                    module["name"].casefold(),
+                    *(alias.casefold() for alias in module["aliases"]),
+                }
+                or normalized_aliases.intersection(
+                    {
+                        module["name"].casefold(),
+                        *(alias.casefold() for alias in module["aliases"]),
+                    }
+                )
+            ),
+            None,
+        )
+        if existing:
+            if len(module_name) > len(existing["name"]):
+                existing["name"] = module_name
+            existing["aliases"] = list(
+                dict.fromkeys(
+                    [
+                        *existing["aliases"],
+                        *(str(alias).strip() for alias in aliases or [] if alias),
+                    ]
+                )
+            )
+            return
 
         seen_module_names.add(module_name)
         graph_modules.append(
             {
                 "name": module_name,
+                "aliases": list(dict.fromkeys(str(alias).strip() for alias in aliases or [] if alias)),
                 "learning_outcomes": [],
                 "assessment_criteria": [],
                 "knowledge_requirements": [],
+                "practical_activities": [],
+                "workplace_activities": [],
+            }
+        )
+
+    for record in course_data.get("module_records", []) or []:
+        if not isinstance(record, dict):
+            continue
+        code = str(record.get("code") or record.get("identifier") or "").strip()
+        title = str(record.get("title") or record.get("name") or "").strip()
+        record_name = f"{code}: {title}" if code and title else title or code
+        if record_name:
+            add_module(record_name, [code, title, str(record.get("id") or "")])
+
+    for value in course_data.get("modules", []) or []:
+        if isinstance(value, dict):
+            code = str(value.get("code") or value.get("identifier") or "").strip()
+            title = str(value.get("title") or value.get("name") or "").strip()
+            module_name = f"{code}: {title}" if code and title else title or code
+            if module_name:
+                add_module(module_name, [code, title, str(value.get("id") or "")])
+            continue
+        module_name = str(value).strip()
+        if module_name:
+            parts = [part.strip() for part in module_name.split(":", 1)]
+            add_module(module_name, parts)
+
+    for topic in course_data.get("knowledge_topics", []) or []:
+        if not isinstance(topic, dict):
+            continue
+        title = str(topic.get("title", "")).strip()
+        code = str(topic.get("code", "")).strip()
+        name = ": ".join(part for part in (code, title) if part)
+        if not name or name in seen_module_names:
+            continue
+        seen_module_names.add(name)
+        graph_modules.append(
+            {
+                "name": name,
+                "aliases": [part for part in (code, title) if part],
+                "learning_outcomes": [],
+                "assessment_criteria": [],
+                "knowledge_requirements": [
+                    str(item.get("description", item))
+                    if isinstance(item, dict)
+                    else str(item)
+                    for item in topic.get("knowledge_items", [])
+                ],
                 "practical_activities": [],
                 "workplace_activities": [],
             }
@@ -101,10 +184,17 @@ def build_knowledge_graph(course_data: dict[str, Any]) -> dict[str, Any]:
 
 
 def get_module(graph: dict[str, Any], module_name: str) -> dict[str, Any] | None:
-    """Return the matching module dictionary, if present."""
+    """Return a module matched by its full name, code, or topic title."""
 
+    normalized_name = _normalize_heading(module_name)
     for module in graph.get("modules", []):
-        if module.get("name") == module_name:
+        if normalized_name in {
+            _normalize_heading(module.get("name", "")),
+            *(
+                _normalize_heading(alias)
+                for alias in module.get("aliases", [])
+            ),
+        }:
             return module
     return None
 

@@ -12,7 +12,8 @@ STOP_WORDS = {
     "same", "should", "such", "than", "that", "their", "them", "then",
     "there", "these", "they", "this", "those", "through", "under",
     "upon", "using", "were", "what", "when", "where", "which", "while",
-    "will", "with", "would", "your",
+    "will", "with", "would", "your", "context", "course", "document",
+    "module", "section",
 }
 
 
@@ -67,7 +68,11 @@ def search_index(index, query):
     matches. Records with equal relevance retain their original index order.
     """
 
-    query_terms = set(re.findall(r"\b\w+\b", query.lower()))
+    query_terms = {
+        word
+        for word in re.findall(r"\b\w+\b", query.lower())
+        if len(word) >= 4 and word not in STOP_WORDS
+    }
 
     if not query_terms:
         return []

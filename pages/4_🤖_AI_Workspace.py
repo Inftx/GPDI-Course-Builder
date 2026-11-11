@@ -18,6 +18,10 @@ from services.jobs.job_manager import (
     fail_job,
     start_job,
 )
+from services.knowledge.course_selection import (
+    get_course_module_options,
+    resolve_module_identifier,
+)
 from services.output.output_manager import save_output
 from services.workflows import GenerationWizard
 
@@ -93,6 +97,37 @@ def _run_project_job(project_name: str, task_type: str, execute_callable):
         raise
 
 
+def _render_generated_output(
+    output_type: str,
+    result: str | dict[str, str],
+) -> None:
+    if isinstance(result, str):
+        st.subheader(output_type)
+        st.markdown(result)
+        return
+
+    lesson_tab, guide_tab, script_tab, assessment_tab = st.tabs(
+        [
+            "📘 Lesson Plan",
+            "👨‍🏫 Facilitator Guide",
+            "🎤 Teaching Script",
+            "📝 Assessment",
+        ]
+    )
+
+    with lesson_tab:
+        st.markdown(result["lesson_plan"])
+
+    with guide_tab:
+        st.markdown(result["facilitator_guide"])
+
+    with script_tab:
+        st.markdown(result["teaching_script"])
+
+    with assessment_tab:
+        st.markdown(result["assessment"])
+
+
 def main() -> None:
     st.set_page_config(
         page_title="AI Workspace",
@@ -152,17 +187,75 @@ def main() -> None:
 
     course_file = Path("projects") / project / "course.json"
     if not course_file.exists():
-        st.warning("Please build the Course Knowledge Base first.")
+        st.warning("Please build the Course Knowledge Base before generating content.")
         st.stop()
 
-    provider = ProviderManager.get_provider("ollama")
+    try:
+        course_data = json.loads(course_file.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        st.error(f"Could not read the Course Knowledge Base: {error}")
+        st.stop()
+    if not isinstance(course_data, dict):
+        st.error("The Course Knowledge Base must contain a JSON object.")
+        st.stop()
+
+    module_options = get_course_module_options(course_data)
+    if not module_options:
+        st.warning(
+            "No processed modules are available. Build the Course Knowledge "
+            "Base after processing project documents, then try again."
+        )
+        st.stop()
+
     output_type = wizard_state.output_type
 
     if wizard_state.step == 2:
-        module_name = st.text_input(
-            "Module Name",
-            value=wizard_state.module or "",
+        module_by_id = {
+            option.identifier: option for option in module_options
+        }
+        module_ids = [option.identifier for option in module_options]
+        selected_module_id = resolve_module_identifier(
+            module_options,
+            wizard_state.module,
+        ) or module_ids[0]
+        selected_module_id = st.selectbox(
+            "Select Module",
+            options=module_ids,
+            index=module_ids.index(selected_module_id),
+            format_func=lambda identifier: module_by_id[identifier].label,
+            key=f"ai_workspace_module_{project}_{hash(tuple(module_ids))}",
         )
+        selected_module = module_by_id[selected_module_id]
+
+        if selected_module.topics:
+            topic_by_id = {
+                topic.identifier: topic for topic in selected_module.topics
+            }
+            topic_ids = [topic.identifier for topic in selected_module.topics]
+            selected_topic_id = (
+                wizard_state.knowledge_topic
+                if (
+                    wizard_state.module == selected_module_id
+                    and wizard_state.knowledge_topic in topic_by_id
+                )
+                else topic_ids[0]
+            )
+            selected_topic_id = st.selectbox(
+                "Select Knowledge Topic",
+                options=topic_ids,
+                index=topic_ids.index(selected_topic_id),
+                format_func=lambda identifier: topic_by_id[identifier].label,
+                key=(
+                    f"ai_workspace_topic_{project}_{selected_module_id}_"
+                    f"{hash(tuple(topic_ids))}"
+                ),
+            )
+        else:
+            selected_topic_id = None
+            st.info(
+                "No processed knowledge topics are available for this module. "
+                "Choose another module or rebuild the Course Knowledge Base."
+            )
 
         cols = st.columns([1, 1])
         with cols[0]:
@@ -172,14 +265,28 @@ def main() -> None:
 
         with cols[1]:
             if st.button("Next ➜", use_container_width=True):
-                if not module_name.strip():
-                    st.warning("Please enter a module name before continuing.")
+                if not selected_topic_id:
+                    st.warning(
+                        "This module has no selectable processed knowledge "
+                        "topics. Choose another module or rebuild the Course "
+                        "Knowledge Base."
+                    )
                 else:
-                    wizard.set_module(module_name.strip())
+                    wizard.set_module(
+                        selected_module.identifier,
+                        selected_module.label,
+                    )
+                    selected_topic = topic_by_id[selected_topic_id]
+                    wizard.set_knowledge_topic(
+                        selected_topic.identifier,
+                        selected_topic.label,
+                    )
                     wizard.next_step()
                     st.rerun()
 
         st.stop()
+
+    provider = ProviderManager.get_provider("ollama")
 
     if wizard_state.step == 3:
         output_type_choice = st.selectbox(
@@ -268,17 +375,32 @@ def main() -> None:
                 ),
             )
 
-        elif output_type == "Teaching Script":
+        elif output_type == "Training Pack":
             duration_hours = st.number_input(
-                "Session Duration",
+                "Session Duration (hours)",
                 min_value=0.5,
                 step=0.5,
                 value=wizard_state.options.get("duration_hours", 0.5),
             )
 
-        elif output_type == "Training Pack":
+            number_of_questions = st.number_input(
+                "Number of Questions",
+                min_value=1,
+                value=wizard_state.options.get("number_of_questions", 10),
+                step=1,
+            )
+
+            difficulty = st.selectbox(
+                "Difficulty",
+                ["Easy", "Moderate", "Advanced"],
+                index=["Easy", "Moderate", "Advanced"].index(
+                    wizard_state.options.get("difficulty", "Moderate")
+                ),
+            )
+
+        elif output_type == "Teaching Script":
             duration_hours = st.number_input(
-                "Session Duration (hours)",
+                "Session Duration",
                 min_value=0.5,
                 step=0.5,
                 value=wizard_state.options.get("duration_hours", 0.5),
@@ -302,7 +424,7 @@ def main() -> None:
                 if output_type in ["Lesson Plan", "Facilitator Guide", "Teaching Script", "Training Pack"]:
                     options["duration_hours"] = duration_hours
 
-                if output_type == "Assessment":
+                if output_type in ["Assessment", "Training Pack"]:
                     options["number_of_questions"] = number_of_questions
                     options["difficulty"] = difficulty
 
@@ -315,7 +437,11 @@ def main() -> None:
     if wizard_state.step == 5:
         st.write("**Review your configuration before generating.**")
         st.write(f"**Project:** {project}")
-        st.write(f"**Module:** {wizard_state.module}")
+        st.write(f"**Module:** {wizard_state.module_label or wizard_state.module}")
+        st.write(
+            f"**Knowledge Topic:** "
+            f"{wizard_state.knowledge_topic_label or wizard_state.knowledge_topic}"
+        )
         st.write(f"**Output Type:** {output_type}")
         st.write("**Options:**")
 
@@ -339,6 +465,8 @@ def main() -> None:
     if wizard_state.step == 6:
         if st.session_state.get(GENERATION_RUN_KEY) and not st.session_state.get(GENERATION_COMPLETE_KEY):
             try:
+                result: str | dict[str, str] | None = None
+
                 if output_type == "Lesson Plan":
                     result = _run_project_job(
                         project,
@@ -351,11 +479,11 @@ def main() -> None:
                             audience=wizard_state.options["audience"],
                             teaching_style=wizard_state.options["teaching_style"],
                             detail_level=wizard_state.options["detail_level"],
+                            knowledge_topic_id=wizard_state.knowledge_topic,
                         ),
                     )
                     st.success("Lesson plan generated and saved successfully.")
-                    st.subheader("Lesson Plan")
-                    st.markdown(result)
+                    _render_generated_output(output_type, result)
 
                 elif output_type == "Facilitator Guide":
                     result = _run_project_job(
@@ -366,11 +494,14 @@ def main() -> None:
                             wizard_state.module,
                             wizard_state.options["duration_hours"],
                             provider,
+                            audience=wizard_state.options["audience"],
+                            teaching_style=wizard_state.options["teaching_style"],
+                            detail_level=wizard_state.options["detail_level"],
+                            knowledge_topic_id=wizard_state.knowledge_topic,
                         ),
                     )
                     st.success("Facilitator guide generated and saved successfully.")
-                    st.subheader("Facilitator Guide")
-                    st.markdown(result)
+                    _render_generated_output(output_type, result)
 
                 elif output_type == "Assessment":
                     result = _run_project_job(
@@ -385,11 +516,11 @@ def main() -> None:
                             audience=wizard_state.options["audience"],
                             teaching_style=wizard_state.options["teaching_style"],
                             detail_level=wizard_state.options["detail_level"],
+                            knowledge_topic_id=wizard_state.knowledge_topic,
                         ),
                     )
                     st.success("Assessment generated and saved successfully.")
-                    st.subheader("Assessment")
-                    st.markdown(result)
+                    _render_generated_output(output_type, result)
 
                 elif output_type == "Teaching Script":
                     result = _run_project_job(
@@ -403,11 +534,11 @@ def main() -> None:
                             audience=wizard_state.options["audience"],
                             teaching_style=wizard_state.options["teaching_style"],
                             detail_level=wizard_state.options["detail_level"],
+                            knowledge_topic_id=wizard_state.knowledge_topic,
                         ),
                     )
                     st.success("Teaching script generated and saved successfully.")
-                    st.subheader("Teaching Script")
-                    st.markdown(result)
+                    _render_generated_output(output_type, result)
 
                 elif output_type == "Training Pack":
                     training_pack = _run_project_job(
@@ -418,8 +549,17 @@ def main() -> None:
                             wizard_state.module,
                             wizard_state.options["duration_hours"],
                             provider,
+                            audience=wizard_state.options["audience"],
+                            teaching_style=wizard_state.options["teaching_style"],
+                            detail_level=wizard_state.options["detail_level"],
+                            knowledge_topic_id=wizard_state.knowledge_topic,
+                            number_of_questions=wizard_state.options[
+                                "number_of_questions"
+                            ],
+                            difficulty=wizard_state.options["difficulty"],
                         ),
                     )
+                    result = training_pack
                     progress_stages = [
                         ("Lesson Plan", "lesson_plan"),
                         ("Facilitator Guide", "facilitator_guide"),
@@ -431,29 +571,14 @@ def main() -> None:
                         st.progress(progress * 25, text=f"{label} generated.")
 
                     st.success("✅ Training Pack Generated Successfully")
+                    _render_generated_output(output_type, training_pack)
 
-                    lesson_tab, guide_tab, script_tab, assessment_tab = st.tabs(
-                        [
-                            "📘 Lesson Plan",
-                            "👨‍🏫 Facilitator Guide",
-                            "🎤 Teaching Script",
-                            "📝 Assessment",
-                        ]
+                if result is None:
+                    raise RuntimeError(
+                        f"Generation returned no content for '{output_type}'."
                     )
 
-                    with lesson_tab:
-                        st.markdown(training_pack["lesson_plan"])
-
-                    with guide_tab:
-                        st.markdown(training_pack["facilitator_guide"])
-
-                    with script_tab:
-                        st.markdown(training_pack["teaching_script"])
-
-                    with assessment_tab:
-                        st.markdown(training_pack["assessment"])
-
-                st.session_state[GENERATION_RESULT_KEY] = True
+                st.session_state[GENERATION_RESULT_KEY] = result
                 st.session_state[GENERATION_COMPLETE_KEY] = True
                 st.session_state[GENERATION_RUN_KEY] = False
 
@@ -463,6 +588,14 @@ def main() -> None:
 
         elif st.session_state.get(GENERATION_COMPLETE_KEY):
             st.success("Generation completed.")
+            generation_result = st.session_state.get(GENERATION_RESULT_KEY)
+            if isinstance(generation_result, (str, dict)):
+                _render_generated_output(output_type, generation_result)
+            else:
+                st.warning(
+                    "The generated content is no longer available in this "
+                    "session. Generate it again to display the result."
+                )
 
         else:
             st.info("Click Generate on the Review step to start generation.")

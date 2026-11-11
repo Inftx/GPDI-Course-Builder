@@ -146,6 +146,8 @@ def build_knowledge(
             "title": None
         },
 
+        "modules": [],
+
         "knowledge_topics": [],
 
         "learning_outcomes": [],
@@ -294,6 +296,14 @@ def build_knowledge(
 
         knowledge["module"]["title"] = "Knowledge Module"
 
+    module_parts = [
+        str(knowledge["module"][key]).strip()
+        for key in ("code", "title")
+        if knowledge["module"].get(key)
+    ]
+    if module_parts:
+        knowledge["modules"] = [": ".join(module_parts)]
+
     # ---------------------------------------------------------
     # CHECK FOR EMPTY TOPICS
     # ---------------------------------------------------------
@@ -335,9 +345,8 @@ def build_knowledge(
         f"{Path(original_filename).stem}.json"
     )
 
-    with open(
-        output_file,
-        "w",
+    with output_file.open(
+        "x",
         encoding="utf-8"
     ) as file:
 

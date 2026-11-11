@@ -69,7 +69,7 @@ if st.button(
 
         st.metric(
             "Modules",
-            len(course["modules"])
+            len(course.get("modules") or [])
         )
 
     with col3:

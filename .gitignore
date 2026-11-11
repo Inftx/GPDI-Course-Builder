@@ -9,3 +9,8 @@ temp/
 
 .DS_Store
 Thumbs.db
+.venv/
+
+/projects/
+
+*.backup

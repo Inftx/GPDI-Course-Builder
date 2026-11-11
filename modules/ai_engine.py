@@ -28,7 +28,7 @@ DOCUMENTS:
 {len(self.course['documents'])}
 
 MODULES:
-{len(self.course['modules'])}
+{len(self.course.get('modules') or [])}
 
 TASK:
 

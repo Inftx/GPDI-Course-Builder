@@ -1,473 +1,154 @@
 import streamlit as st
 
 from modules.session_manager import get_current_project
-
-from modules.file_manager import (
-    save_uploaded_file,
-    save_extracted_text,
-    save_formatted_text
+from services.document_upload import (
+    DocumentUploadResult,
+    process_uploaded_documents,
 )
 
-from modules.document_processor import process_document
-from modules.document_analyzer import analyze_document
-from modules.metadata_manager import save_document_metadata
-from modules.knowledge_builder import build_knowledge
-
-
-# --------------------------------------------------
-# PAGE CONFIGURATION
-# --------------------------------------------------
 
 st.set_page_config(
     page_title="Upload Documents",
-    page_icon="📄"
+    page_icon="📄",
 )
 
 st.title("📄 Upload Documents")
 
-
-# --------------------------------------------------
-# CURRENT PROJECT
-# --------------------------------------------------
-
 project = get_current_project()
-
 if not project:
-    st.warning(
-        "Please select a project from the Project Manager first."
-    )
+    st.warning("Please select a project from the Project Manager first.")
     st.stop()
 
 st.success(f"Current Project: {project}")
-
 st.divider()
 
-
-# --------------------------------------------------
-# FILE UPLOAD
-# --------------------------------------------------
-
-uploaded_file = st.file_uploader(
-    "Upload a Learner Guide, Facilitator Guide or Supporting Document",
-    type=[
-        "pdf",
-        "docx",
-        "txt",
-        "png",
-        "jpg",
-        "jpeg"
-    ]
-)
-
-
-if uploaded_file:
-
-    with st.spinner("Processing document..."):
-
-        # --------------------------------------------------
-        # SAVE ORIGINAL DOCUMENT
-        # --------------------------------------------------
-
-        save_uploaded_file(
-            uploaded_file,
-            project
-        )
-
-        # --------------------------------------------------
-        # PROCESS DOCUMENT
-        # --------------------------------------------------
-
-        result = process_document(
-            uploaded_file
-        )
-
-        raw_text = result["raw"]
-        cleaned_text = result["clean"]
-        structured_text = result["structured"]
-
-        # --------------------------------------------------
-        # SAVE CLEANED TEXT
-        # --------------------------------------------------
-
-        save_extracted_text(
-            cleaned_text,
-            uploaded_file.name,
-            project
-        )
-
-        # --------------------------------------------------
-        # SAVE STRUCTURED TEXT
-        # --------------------------------------------------
-
-        save_formatted_text(
-            structured_text,
-            uploaded_file.name,
-            project
-        )
-
-        # --------------------------------------------------
-        # ANALYSE DOCUMENT
-        # --------------------------------------------------
-
-        analysis = analyze_document(
-            structured_text
-        )
-
-        # --------------------------------------------------
-        # BUILD KNOWLEDGE BASE
-        # --------------------------------------------------
-
-        knowledge = build_knowledge(
-            structured_text,
-            uploaded_file.name,
-            project
-        )
-
-        # --------------------------------------------------
-        # SAVE METADATA
-        # --------------------------------------------------
-
-        save_document_metadata(
-            project,
-            uploaded_file.name,
-            analysis
-        )
-
-
-    # --------------------------------------------------
-    # SUCCESS
-    # --------------------------------------------------
-
-    st.success(
-        "✅ Document processed successfully."
+with st.form("document_upload_form", clear_on_submit=True):
+    uploaded_files = st.file_uploader(
+        "Select learner guides, facilitator guides, or supporting documents",
+        type=["pdf", "docx", "txt", "png", "jpg", "jpeg"],
+        accept_multiple_files=True,
+    )
+    submitted = st.form_submit_button(
+        "Submit Documents",
+        type="primary",
     )
 
-    st.divider()
-
-
-    # --------------------------------------------------
-    # DOCUMENT STATISTICS
-    # --------------------------------------------------
-
-    st.subheader("📊 Document Statistics")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.metric(
-            "Words",
-            analysis["word_count"]
-        )
-
-    with col2:
-        st.metric(
-            "Characters",
-            analysis["character_count"]
-        )
-
-    with col3:
-        st.metric(
-            "Estimated Pages",
-            analysis["estimated_pages"]
-        )
-
-    with col4:
-        st.metric(
-            "Reading Time",
-            f"{analysis['reading_time']} min"
-        )
-
-
-    st.divider()
-
-
-    # --------------------------------------------------
-    # DOCUMENT TABS
-    # --------------------------------------------------
-
-    raw_tab, clean_tab, structured_tab = st.tabs([
-        "📄 Raw Text",
-        "🧹 Cleaned Text",
-        "🗂️ Structured Document"
-    ])
-
-
-    with raw_tab:
-
-        st.text_area(
-            label="Raw Extracted Text",
-            value=raw_text,
-            height=500
-        )
-
-
-    with clean_tab:
-
-        st.text_area(
-            label="Cleaned Text",
-            value=cleaned_text,
-            height=500
-        )
-
-
-    with structured_tab:
-
-        st.text_area(
-            label="Structured Document",
-            value=structured_text,
-            height=500
-        )
-
-
-    st.divider()
-
-
-    # --------------------------------------------------
-    # DETECTED HEADINGS
-    # --------------------------------------------------
-
-    st.subheader("📑 Detected Headings")
-
-    if analysis["headings"]:
-
-        for heading in analysis["headings"]:
-
-            st.write(f"• {heading}")
-
+if submitted:
+    if not uploaded_files:
+        st.warning("Select at least one document before submitting.")
+        st.session_state["document_upload_results"] = []
     else:
-
-        st.info(
-            "No headings detected."
+        attempted_uploads = st.session_state.setdefault(
+            "document_upload_attempts",
+            set(),
         )
-
-
-    st.divider()
-
-
-    # --------------------------------------------------
-    # TOP KEYWORDS
-    # --------------------------------------------------
-
-    st.subheader("🔑 Top Keywords")
-
-    if analysis["keywords"]:
-
-        for word, count in analysis["keywords"]:
-
-            st.write(
-                f"**{word}** ({count})"
-            )
-
-    else:
-
-        st.info(
-            "No keywords detected."
-        )
-
-
-    st.divider()
-
-
-    # --------------------------------------------------
-    # KNOWLEDGE BASE SUMMARY
-    # --------------------------------------------------
-
-    st.subheader("🧠 Knowledge Base Summary")
-
-
-    module = knowledge.get(
-        "module",
-        {}
-    )
-
-    knowledge_topics = knowledge.get(
-        "knowledge_topics",
-        []
-    )
-
-    learning_outcomes = knowledge.get(
-        "learning_outcomes",
-        []
-    )
-
-    assessment_criteria = knowledge.get(
-        "assessment_criteria",
-        []
-    )
-
-    knowledge_requirements = knowledge.get(
-        "knowledge_requirements",
-        []
-    )
-
-    practical_activities = knowledge.get(
-        "practical_activities",
-        []
-    )
-
-    workplace_activities = knowledge.get(
-        "workplace_activities",
-        []
-    )
-
-    warnings = knowledge.get(
-        "warnings",
-        []
-    )
-
-
-    total_knowledge_items = sum(
-        len(topic.get("knowledge_items", []))
-        for topic in knowledge_topics
-    )
-
-
-    # --------------------------------------------------
-    # SUMMARY METRICS
-    # --------------------------------------------------
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-
-        st.metric(
-            "Knowledge Module",
-            module.get("code") or "Not detected"
-        )
-
-    with col2:
-
-        st.metric(
-            "Knowledge Topics",
-            len(knowledge_topics)
-        )
-
-    with col3:
-
-        st.metric(
-            "Knowledge Items",
-            total_knowledge_items
-        )
-
-    with col4:
-
-        st.metric(
-            "Warnings",
-            len(warnings)
-        )
-
-
-    st.divider()
-
-
-    # --------------------------------------------------
-    # KNOWLEDGE TOPICS
-    # --------------------------------------------------
-
-    st.subheader("📚 Knowledge Topics")
-
-
-    if knowledge_topics:
-
-        for topic in knowledge_topics:
-
-            topic_code = topic.get(
-                "code",
-                "Unknown"
-            )
-
-            topic_title = topic.get(
-                "title",
-                "Untitled Topic"
-            )
-
-            items = topic.get(
-                "knowledge_items",
-                []
-            )
-
-            with st.expander(
-                f"{topic_code} - {topic_title}"
-            ):
-
-                st.write(
-                    f"**Knowledge Items:** {len(items)}"
+        with st.spinner("Processing submitted documents..."):
+            st.session_state["document_upload_results"] = (
+                process_uploaded_documents(
+                    uploaded_files,
+                    project,
+                    attempted_uploads,
                 )
+            )
 
-                for item in items:
-
-                    st.markdown(
-                        f"- **{item['code']}** "
-                        f"{item['description']}"
-                    )
-
+def _show_result(result: DocumentUploadResult) -> None:
+    if result.status == "success":
+        st.success(f"{result.filename}: {result.message}")
+        if result.analysis is not None and result.knowledge is not None:
+            with st.expander(f"View details for {result.filename}"):
+                _show_document_details(result)
+    elif result.status == "failure":
+        st.error(f"{result.filename}: {result.message}")
     else:
+        st.info(f"{result.filename}: {result.message}")
 
-        st.info(
-            "No Knowledge Topics detected."
+
+def _show_document_details(result: DocumentUploadResult) -> None:
+    analysis = result.analysis or {}
+    knowledge = result.knowledge or {}
+
+    st.subheader("Document statistics")
+    columns = st.columns(4)
+    metrics = (
+        ("Words", analysis.get("word_count", 0)),
+        ("Characters", analysis.get("character_count", 0)),
+        ("Estimated pages", analysis.get("estimated_pages", 0)),
+        ("Reading time", f"{analysis.get('reading_time', 0)} min"),
+    )
+    for column, (label, value) in zip(columns, metrics):
+        column.metric(label, value)
+
+    raw_tab, clean_tab, structured_tab = st.tabs(
+        ["Raw text", "Cleaned text", "Structured document"]
+    )
+    with raw_tab:
+        st.text_area(
+            "Raw extracted text",
+            value=result.raw_text,
+            height=300,
+            key=f"{result.filename}_raw",
+        )
+    with clean_tab:
+        st.text_area(
+            "Cleaned text",
+            value=result.cleaned_text,
+            height=300,
+            key=f"{result.filename}_clean",
+        )
+    with structured_tab:
+        st.text_area(
+            "Structured document",
+            value=result.structured_text,
+            height=300,
+            key=f"{result.filename}_structured",
         )
 
+    st.subheader("Knowledge base summary")
+    module = knowledge.get("module")
+    if isinstance(module, dict):
+        module_label = module.get("code") or module.get("title") or "Not detected"
+    else:
+        module_label = module or "Not detected"
+    topics = knowledge.get("knowledge_topics") or []
+    if not isinstance(topics, list):
+        topics = [topics]
+    total_items = sum(
+        len(topic.get("knowledge_items", []))
+        for topic in topics
+        if isinstance(topic, dict)
+        and isinstance(topic.get("knowledge_items", []), list)
+    )
+    st.write(f"**Knowledge module:** {module_label}")
+    st.write(f"**Knowledge topics:** {len(topics)}")
+    st.write(f"**Knowledge items:** {total_items}")
 
-    # --------------------------------------------------
-    # OTHER STRUCTURED INFORMATION
-    # --------------------------------------------------
+    for heading, key in (
+        ("Learning outcomes", "learning_outcomes"),
+        ("Assessment criteria", "assessment_criteria"),
+        ("Knowledge requirements", "knowledge_requirements"),
+        ("Practical activities", "practical_activities"),
+        ("Workplace activities", "workplace_activities"),
+    ):
+        values = knowledge.get(key) or []
+        if not isinstance(values, list):
+            values = [values]
+        if values:
+            st.markdown(f"**{heading}:**")
+            for value in values:
+                st.write(f"- {value}")
 
-    st.divider()
-
-    st.subheader("📋 Additional Information")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-
-        st.metric(
-            "Learning Outcomes",
-            len(learning_outcomes)
-        )
-
-    with col2:
-
-        st.metric(
-            "Assessment Criteria",
-            len(assessment_criteria)
-        )
-
-    with col3:
-
-        st.metric(
-            "Practical Activities",
-            len(practical_activities)
-        )
-
-    with col4:
-
-        st.metric(
-            "Workplace Activities",
-            len(workplace_activities)
-        )
-
-
-    # --------------------------------------------------
-    # WARNINGS
-    # --------------------------------------------------
-
+    warnings = knowledge.get("warnings") or []
     if warnings:
-
-        st.divider()
-
-        st.subheader("⚠️ Parser Warnings")
-
+        st.markdown("**Parser warnings:**")
         for warning in warnings:
-
             st.warning(warning)
 
-
-    # --------------------------------------------------
-    # RAW KNOWLEDGE JSON
-    # --------------------------------------------------
-
-    with st.expander(
-        "🔍 View Complete Knowledge JSON"
-    ):
-
+    with st.expander("View complete knowledge JSON"):
         st.json(knowledge)
+
+
+results = st.session_state.get("document_upload_results", [])
+if results:
+    st.subheader("Processing results")
+    for result in results:
+        _show_result(result)

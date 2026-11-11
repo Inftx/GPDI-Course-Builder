@@ -17,6 +17,9 @@ def generate_training_pack(
     audience: str | None = None,
     teaching_style: str | None = None,
     detail_level: str | None = None,
+    knowledge_topic_id: str | None = None,
+    number_of_questions: int = 10,
+    difficulty: str = "Moderate",
 ) -> dict[str, str]:
     """Generate all training-pack documents sequentially.
 
@@ -38,6 +41,7 @@ def generate_training_pack(
         audience=audience,
         teaching_style=teaching_style,
         detail_level=detail_level,
+        knowledge_topic_id=knowledge_topic_id,
     )
     facilitator_guide = generate_facilitator_guide(
         project_name,
@@ -47,6 +51,7 @@ def generate_training_pack(
         audience=audience,
         teaching_style=teaching_style,
         detail_level=detail_level,
+        knowledge_topic_id=knowledge_topic_id,
     )
     teaching_script = generate_teaching_script(
         project_name,
@@ -56,16 +61,18 @@ def generate_training_pack(
         audience=audience,
         teaching_style=teaching_style,
         detail_level=detail_level,
+        knowledge_topic_id=knowledge_topic_id,
     )
     assessment = generate_assessment(
         project_name,
         module_name,
-        10,
-        "Moderate",
+        number_of_questions,
+        difficulty,
         provider,
         audience=audience,
         teaching_style=teaching_style,
         detail_level=detail_level,
+        knowledge_topic_id=knowledge_topic_id,
     )
 
     return {

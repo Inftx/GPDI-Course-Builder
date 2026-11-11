@@ -13,6 +13,7 @@ def generate_teaching_script(
     audience: str | None = None,
     teaching_style: str | None = None,
     detail_level: str | None = None,
+    knowledge_topic_id: str | None = None,
 ) -> str:
     """Generate and save a context-grounded Markdown teaching script.
 
@@ -44,4 +45,5 @@ def generate_teaching_script(
         audience=audience,
         teaching_style=teaching_style,
         detail_level=detail_level,
+        knowledge_topic_id=knowledge_topic_id,
     )
